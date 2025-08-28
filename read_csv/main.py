@@ -62,15 +62,10 @@ def validate_csv_std(path):
 def validate_csv_pandas(path):
     pd.read_csv(
         path,
-        sep=",",
-        quotechar='"',
-        escapechar=None,
-        engine="python",
-        on_bad_lines="error",
-        converters={ "Index": must_int },
+        converters={ "Index": validated_int },
     )
 
-def must_int(x: str) -> int:
+def validated_int(x: str) -> int:
     # explode early if the Index column isn't actually an integer
     return int(x)  # ValueError -> pandas raises
 
