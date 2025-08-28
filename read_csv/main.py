@@ -17,8 +17,10 @@ def main():
     read_csv_std(file)
     print_block("Read (PANDAS)")
     read_csv_pandas(file)
-    print_block("Validate")
+    print_block("Validate (STD/CSV)")
     validate_csv_std(file)
+    print_block("Validate (PANDAS)")
+    validate_csv_pandas(file)
 
 def print_block(text):
     print(f"====== {text} ======")
@@ -46,14 +48,30 @@ def read_csv_pandas(path):
 
 def validate_csv_std(path):
     with open(path, newline="") as file:
-        reader = csv.reader(file, dialect=StrictDialect)
+        reader = csv.reader(file)
         headers = next(reader)
         num_columns = len(headers)
         for i, row in enumerate(reader, start=2):  # 1-based lines, header=1
-            print(f"[{len(row)}] {row}")
             if len(row) != num_columns:
-                raise ValueError(
+                print(
                     f"Line {i}: expected {num_columns} fields, saw {len(row)} -> {row}"
                 )
+            else:
+                print(f"Line {i}: OK")
+
+def validate_csv_pandas(path):
+    pd.read_csv(
+        path,
+        sep=",",
+        quotechar='"',
+        escapechar=None,
+        engine="python",
+        on_bad_lines="error",
+        converters={ "Index": must_int },
+    )
+
+def must_int(x: str) -> int:
+    # explode early if the Index column isn't actually an integer
+    return int(x)  # ValueError -> pandas raises
 
 main()
