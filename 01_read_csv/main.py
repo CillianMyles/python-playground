@@ -54,10 +54,10 @@ def validate_csv_std(path):
         for i, row in enumerate(reader, start=2):  # 1-based lines, header=1
             if len(row) != num_columns:
                 print(
-                    f"Line {i}: expected {num_columns} fields, saw {len(row)} -> {row}"
+                    f"Line {i} - ❌ - expected {num_columns} fields, saw {len(row)} -> {row}"
                 )
             else:
-                print(f"Line {i}: OK")
+                print(f"Line {i} - ✅ - OK")
 
 def validate_csv_pandas(path):
     pd.read_csv(
