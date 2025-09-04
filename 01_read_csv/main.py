@@ -2,17 +2,6 @@ import csv
 import pandas as pd
 
 
-class StrictDialect(csv.excel):
-    delimiter = ","
-    quotechar = '"'
-    escapechar = None
-    doublequote = False
-    strict = True
-    skipinitialspace = False
-    lineterminator = '\r\n'
-    quoting = csv.QUOTE_MINIMAL
-
-
 def main():
     file = "data.csv"
     print_block("Read STD/CSV")
@@ -36,48 +25,8 @@ def print_block(text):
 def read_csv_std(path):
     with open(path, newline="") as file:
         reader = csv.reader(file)
-        for row in reader:
-            print(f"{[len(row)]} {row}")
-
-
-def read_csv_pandas(path):
-    df = pd.read_csv(
-        path,
-        on_bad_lines="skip",
-    )
-    headers = df.columns.to_list()
-    print(f"[{len(headers)}] {headers}")
-    for _, row in df.iterrows():
-        values = row.tolist()
-        print(f"[{len(values)}] {values}")
-
-
-def read_csv_pandas_with_provided_headers(path):
-     with open(path, newline="") as file:
-        reader = csv.reader(file)
-        headers = next(reader)
-        print(f"[{len(headers)}] {headers}")
-        df = pd.read_csv(
-            path,
-            names=headers,
-            on_bad_lines="skip",
-        )
-        for _, row in df.iterrows():
-            values = row.tolist()
-            print(f"[{len(values)}] {values}")
-
-
-def read_csv_pandas_with_pyarrow_engine(path):
-    df = pd.read_csv(
-        path,
-        engine="pyarrow",
-        on_bad_lines="skip",
-    )
-    headers = df.columns.to_list()
-    print(f"[{len(headers)}] {headers}")
-    for _, row in df.iterrows():
-        values = row.tolist()
-        print(f"[{len(values)}] {values}")
+        for i, row in enumerate(reader):
+            print(f"i={i}, len={len(row)} -> {row}")
 
 
 def validate_csv_std(path):
@@ -85,13 +34,53 @@ def validate_csv_std(path):
         reader = csv.reader(file)
         headers = next(reader)
         num_columns = len(headers)
-        for i, row in enumerate(reader, start=2):  # 1-based lines, header=1
+        for i, row in enumerate(reader, start=1):
             if len(row) != num_columns:
                 print(
-                    f"Line {i} - ❌ - expected {num_columns} fields, saw {len(row)} -> {row}"
+                    f"i={i} - ❌ - expected {num_columns} fields, saw {len(row)} -> {row}"
                 )
             else:
-                print(f"Line {i} - ✅ - OK")
+                print(f"i={i} - ✅ - expected {num_columns} fields, saw {len(row)}")
+
+
+def read_csv_pandas(path):
+    df = pd.read_csv(
+        path,
+        on_bad_lines="error",  # does nothing whether 'warn' or 'skip' - silently moves the columns around - see logs
+    )
+    headers = df.columns.to_list()
+    print(f"i=0, len={len(headers)} -> {headers}")
+    for i, row in df.iterrows():
+        values = row.tolist()
+        print(f"i={i}, len={len(values)} -> {values}")
+
+
+def read_csv_pandas_with_provided_headers(path):
+     with open(path, newline="") as file:
+        reader = csv.reader(file)
+        headers = next(reader)
+        print(f"i=0, len={len(headers)} -> {headers}")
+        df = pd.read_csv(
+            path,
+            names=headers,  # works but we end have to read the csv upfront, and the column ends up as a row in the df
+            on_bad_lines="skip",
+        )
+        for i, row in df.iterrows():
+            values = row.tolist()
+            print(f"i={i}, len={len(values)} -> {values}")
+
+
+def read_csv_pandas_with_pyarrow_engine(path):
+    df = pd.read_csv(
+        path,
+        engine="pyarrow",  # this gives the desired result, but not fully sure of the implications of switching
+        on_bad_lines="skip",
+    )
+    headers = df.columns.to_list()
+    print(f"i=0, len={len(headers)} -> {headers}")
+    for i, row in df.iterrows():
+        values = row.tolist()
+        print(f"i={i}, len={len(values)} -> {values}")
 
 
 def validate_csv_pandas_by_casting(path):
@@ -102,8 +91,7 @@ def validate_csv_pandas_by_casting(path):
 
 
 def validated_int(x: str) -> int:
-    # explode early if the Index column isn't actually an integer
-    return int(x)  # ValueError -> pandas raises
+    return int(x)  # pandas will raise a ValueError if this isn't an int
 
 
 main()
