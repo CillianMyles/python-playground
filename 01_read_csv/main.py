@@ -1,6 +1,7 @@
 import csv
 import pandas as pd
 
+
 class StrictDialect(csv.excel):
     delimiter = ","
     quotechar = '"'
@@ -11,19 +12,26 @@ class StrictDialect(csv.excel):
     lineterminator = '\r\n'
     quoting = csv.QUOTE_MINIMAL
 
+
 def main():
     file = "data.csv"
-    print_block("Read (STD/CSV)")
+    print_block("Read STD/CSV")
     read_csv_std(file)
-    print_block("Read (PANDAS)")
-    read_csv_pandas(file)
-    print_block("Validate (STD/CSV)")
+    print_block("Validate STD/CSV")
     validate_csv_std(file)
-    print_block("Validate (PANDAS)")
-    validate_csv_pandas(file)
+    print_block("Read PANDAS default")
+    read_csv_pandas(file)
+    print_block("Read PANDAS with provided headers")
+    read_csv_pandas_with_provided_headers(file)
+    print_block("Read PANDAS with pyarrow engine")
+    read_csv_pandas_with_pyarrow_engine(file)
+    print_block("Validate PANDAS by type casting")
+    validate_csv_pandas_by_casting(file)
+
 
 def print_block(text):
     print(f"====== {text} ======")
+
 
 def read_csv_std(path):
     with open(path, newline="") as file:
@@ -31,20 +39,46 @@ def read_csv_std(path):
         for row in reader:
             print(f"{[len(row)]} {row}")
 
+
 def read_csv_pandas(path):
     df = pd.read_csv(
         path,
-        sep=",",
-        quotechar='"',
-        escapechar=None,
-        engine="c",
-        on_bad_lines="error",
+        on_bad_lines="skip",
     )
-    columns = df.columns
-    print(f"[{len(columns)}] {columns}")
+    headers = df.columns.to_list()
+    print(f"[{len(headers)}] {headers}")
     for _, row in df.iterrows():
         values = row.tolist()
         print(f"[{len(values)}] {values}")
+
+
+def read_csv_pandas_with_provided_headers(path):
+     with open(path, newline="") as file:
+        reader = csv.reader(file)
+        headers = next(reader)
+        print(f"[{len(headers)}] {headers}")
+        df = pd.read_csv(
+            path,
+            names=headers,
+            on_bad_lines="skip",
+        )
+        for _, row in df.iterrows():
+            values = row.tolist()
+            print(f"[{len(values)}] {values}")
+
+
+def read_csv_pandas_with_pyarrow_engine(path):
+    df = pd.read_csv(
+        path,
+        engine="pyarrow",
+        on_bad_lines="skip",
+    )
+    headers = df.columns.to_list()
+    print(f"[{len(headers)}] {headers}")
+    for _, row in df.iterrows():
+        values = row.tolist()
+        print(f"[{len(values)}] {values}")
+
 
 def validate_csv_std(path):
     with open(path, newline="") as file:
@@ -59,14 +93,17 @@ def validate_csv_std(path):
             else:
                 print(f"Line {i} - ✅ - OK")
 
-def validate_csv_pandas(path):
+
+def validate_csv_pandas_by_casting(path):
     pd.read_csv(
         path,
         converters={ "Index": validated_int },
     )
 
+
 def validated_int(x: str) -> int:
     # explode early if the Index column isn't actually an integer
     return int(x)  # ValueError -> pandas raises
+
 
 main()
