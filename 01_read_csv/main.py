@@ -1,5 +1,6 @@
 import csv
 import pandas as pd
+import polars as pl
 
 
 def main():
@@ -14,6 +15,8 @@ def main():
     read_csv_pandas_with_provided_headers(file)
     print_block("Read PANDAS with pyarrow engine")
     read_csv_pandas_with_pyarrow_engine(file)
+    print_block("Read POLARS default")
+    read_csv_polars(file)
     print_block("Validate PANDAS by type casting")
     validate_csv_pandas_by_casting(file)
 
@@ -75,6 +78,20 @@ def read_csv_pandas_with_pyarrow_engine(path):
         path,
         engine="pyarrow",  # this gives the desired result, but not fully sure of the implications of switching
         on_bad_lines="skip",
+    )
+    headers = df.columns.to_list()
+    print(f"i=0, len={len(headers)} -> {headers}")
+    for i, row in df.iterrows():
+        values = row.tolist()
+        print(f"i={i}, len={len(values)} -> {values}")
+
+
+def read_csv_polars(path):
+    df = pl.read_csv(
+        path,
+        use_pyarrow=True,
+        infer_schema=False,
+        ignore_errors=True,
     )
     headers = df.columns.to_list()
     print(f"i=0, len={len(headers)} -> {headers}")
