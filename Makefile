@@ -15,5 +15,5 @@ verify-venv:
 destroy-venv:
 	rm -rf $(VENV)
 
-install-deps: setup-venv
+install-deps:
 	$(PYTHON) -m pip install -r requirements.txt
