@@ -1,6 +1,19 @@
-PYTHON ?= python3
+VENV := .venv
+PYTHON := $(VENV)/bin/python
 
-.PHONY: install-deps
-install-deps:
+.PHONY: setup-venv verify-venv destroy-venv install-deps
+
+setup-venv:
+	python3 -m venv $(VENV)
 	$(PYTHON) -m pip install --upgrade pip
-	$(PYTHON) -m pip install $$(pipx run toml-cli get pyproject.toml project.dependencies | awk -F'=' '{print $$1}')
+
+verify-venv:
+	which python
+	which pip
+	python -m pip --version
+
+destroy-venv:
+	rm -rf $(VENV)
+
+install-deps: setup-venv
+	$(PYTHON) -m pip install -r requirements.txt
