@@ -8,7 +8,7 @@ teal = "#14E7E8"
 violet = "#7C8CEF"
 
 # Scheme
-light_mode = True
+light_mode = False
 primary_color = white if light_mode else black
 text_color = black if light_mode else white
 grid_color = sandstone if light_mode else "#333333"
