@@ -66,26 +66,19 @@ def read_csv_pandas(path):
         path,
         on_bad_lines="error",  # does nothing whether 'warn' or 'skip' - silently moves the columns around - see logs
     )
-    headers = df.columns.to_list()
-    print(f"i=0, len={len(headers)} -> {headers}")
-    for i, row in df.iterrows():
-        values = row.tolist()
-        print(f"i={i}, len={len(values)} -> {values}")
+    print_df(df)
 
 
 def read_csv_pandas_with_provided_headers(path):
      with open(path, newline="") as file:
         reader = csv.reader(file)
         headers = next(reader)
-        print(f"i=0, len={len(headers)} -> {headers}")
         df = pd.read_csv(
             path,
             names=headers,  # works but we end have to read the csv upfront, and the column ends up as a row in the df
             on_bad_lines="skip",
         )
-        for i, row in df.iterrows():
-            values = row.tolist()
-            print(f"i={i}, len={len(values)} -> {values}")
+        print_df(df)
 
 
 def read_csv_pandas_with_pyarrow_engine(path):
@@ -94,11 +87,7 @@ def read_csv_pandas_with_pyarrow_engine(path):
         engine="pyarrow",  # this gives the desired result, but not fully sure of the implications of switching
         on_bad_lines="skip",
     )
-    headers = df.columns.to_list()
-    print(f"i=0, len={len(headers)} -> {headers}")
-    for i, row in df.iterrows():
-        values = row.tolist()
-        print(f"i={i}, len={len(values)} -> {values}")
+    print_df(df)
 
 
 def read_csv_pyarrow(path):
@@ -112,11 +101,7 @@ def read_csv_pyarrow(path):
         ),
     )
     df = table.to_pandas()
-    headers = df.columns.to_list()
-    print(f"i=0, len={len(headers)} -> {headers}")
-    for i, row in df.iterrows():
-        values = row.tolist()
-        print(f"i={i}, len={len(values)} -> {values}")
+    print_df(df)
 
 
 def read_csv_pyarrow_incremental(path):
@@ -130,14 +115,10 @@ def read_csv_pyarrow_incremental(path):
         ),
     )
     df = stream.read_pandas()
-    headers = df.columns.to_list()
-    print(f"i=0, len={len(headers)} -> {headers}")
-    for i, row in df.iterrows():
-        values = row.tolist()
-        print(f"i={i}, len={len(values)} -> {values}")
+    print_df(df)
 
 
-def skip_handler(row):
+def skip_handler(invalid_row):
     return "skip"
 
 
@@ -148,11 +129,7 @@ def read_csv_polars(path):
         infer_schema=False,
         ignore_errors=True,
     )
-    headers = df.columns.to_list()
-    print(f"i=0, len={len(headers)} -> {headers}")
-    for i, row in df.iterrows():
-        values = row.tolist()
-        print(f"i={i}, len={len(values)} -> {values}")
+    print_df(df)
 
 
 def validate_csv_pandas_by_casting(path):
@@ -164,6 +141,14 @@ def validate_csv_pandas_by_casting(path):
 
 def validated_int(x: str) -> int:
     return int(x)  # pandas will raise a ValueError if this isn't an int
+
+
+def print_df(df):
+    headers = df.columns.to_list()
+    print(f"i=0, len={len(headers)} -> {headers}")
+    for i, row in df.iterrows():
+        values = row.tolist()
+        print(f"i={i}, len={len(values)} -> {values}")
 
 
 main()
