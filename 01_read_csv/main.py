@@ -1,28 +1,40 @@
 import csv
 import pandas as pd
 import polars as pl
+import pyarrow as pa
+import pyarrow.csv as pacsv
 
 
 def main():
     file = "data.csv"
+
     print_block("Read STD/CSV")
     read_csv_std(file)
+
     print_block("Validate STD/CSV")
     validate_csv_std(file)
+
     print_block("Read PANDAS default")
     read_csv_pandas(file)
+
     print_block("Read PANDAS with provided headers")
     read_csv_pandas_with_provided_headers(file)
+
     print_block("Read PANDAS with pyarrow engine")
     read_csv_pandas_with_pyarrow_engine(file)
+
+    print_block("Read PYARROW default")
+    read_csv_pyarrow(file)
+
     print_block("Read POLARS default")
     read_csv_polars(file)
+
     print_block("Validate PANDAS by type casting")
     validate_csv_pandas_by_casting(file)
 
 
 def print_block(text):
-    print(f"====== {text} ======")
+    print(f"\n====== {text} ======")
 
 
 def read_csv_std(path):
@@ -84,6 +96,25 @@ def read_csv_pandas_with_pyarrow_engine(path):
     for i, row in df.iterrows():
         values = row.tolist()
         print(f"i={i}, len={len(values)} -> {values}")
+
+
+def read_csv_pyarrow(path):
+    table = pacsv.read_csv(
+        path,
+        parse_options=pacsv.ParseOptions(
+            invalid_row_handler=skip_handler
+        ),
+    )
+    df = table.to_pandas()
+    headers = df.columns.to_list()
+    print(f"i=0, len={len(headers)} -> {headers}")
+    for i, row in df.iterrows():
+        values = row.tolist()
+        print(f"i={i}, len={len(values)} -> {values}")
+
+
+def skip_handler(row):
+    return "skip"
 
 
 def read_csv_polars(path):
