@@ -104,6 +104,9 @@ def read_csv_pyarrow(path):
         parse_options=pacsv.ParseOptions(
             invalid_row_handler=skip_handler
         ),
+        read_options=pacsv.ReadOptions(
+            block_size=50,
+        ),
     )
     df = table.to_pandas()
     headers = df.columns.to_list()
