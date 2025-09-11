@@ -26,6 +26,9 @@ def main():
     print_block("Read PYARROW default")
     read_csv_pyarrow(file)
 
+    print_block("Read PYARROW incremental")
+    read_csv_pyarrow_incremental(file)
+
     print_block("Read POLARS default")
     read_csv_polars(file)
 
@@ -109,6 +112,24 @@ def read_csv_pyarrow(path):
         ),
     )
     df = table.to_pandas()
+    headers = df.columns.to_list()
+    print(f"i=0, len={len(headers)} -> {headers}")
+    for i, row in df.iterrows():
+        values = row.tolist()
+        print(f"i={i}, len={len(values)} -> {values}")
+
+
+def read_csv_pyarrow_incremental(path):
+    stream = pacsv.open_csv(
+        path,
+        parse_options=pacsv.ParseOptions(
+            invalid_row_handler=skip_handler
+        ),
+        read_options=pacsv.ReadOptions(
+            block_size=50,
+        ),
+    )
+    df = stream.read_pandas()
     headers = df.columns.to_list()
     print(f"i=0, len={len(headers)} -> {headers}")
     for i, row in df.iterrows():
