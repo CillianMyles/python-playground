@@ -77,12 +77,15 @@ def read_csv_pandas_with_pyarrow_engine(path):
 
 def read_csv_pandas_starting_at_first_valid_data_row(path):
     print_block("Read PANDAS starting at first valid data row")
+
+    header_row: int = -1
     first_valid_data_row: int = -1
     
     with open(path, newline="") as file:
         reader = csv.reader(file)
         for i, row in enumerate(reader):
             if i == 0 and _is_header(row):
+                header_row = i
                 continue
             if _is_valid_length(row):
                 first_valid_data_row = i
@@ -91,15 +94,16 @@ def read_csv_pandas_starting_at_first_valid_data_row(path):
     if first_valid_data_row == -1:
         raise Exception('No valid data rows found')
     
-    skip_rows = [i for i in range(first_valid_data_row)]
-    print("skip_rows:", skip_rows)
+    skip_rows = [i for i in range(header_row + 1, first_valid_data_row)]
+    config = {
+        "names": _headers,
+        "header": header_row if header_row != -1 else None,
+        "skiprows": skip_rows,
+        "on_bad_lines": "skip",
+    }
+    print("config:", config)
 
-    df = pd.read_csv(
-        path,
-        names=_headers,
-        skiprows=skip_rows,
-        on_bad_lines="skip",
-    )
+    df = pd.read_csv(path, **config)
     print_df(df)
 
 
