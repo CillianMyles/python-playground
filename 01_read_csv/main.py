@@ -29,6 +29,9 @@ def main():
     print_block("Read PYARROW incremental")
     read_csv_pyarrow_incremental(file)
 
+    print_block("Read PANDAS starting at first valid data row")
+    read_csv_pandas_starting_at_first_valid_data_row(file)
+
     print_block("Read POLARS default")
     read_csv_polars(file)
 
@@ -70,15 +73,12 @@ def read_csv_pandas(path):
 
 
 def read_csv_pandas_with_provided_headers(path):
-     with open(path, newline="") as file:
-        reader = csv.reader(file)
-        headers = next(reader)
-        df = pd.read_csv(
-            path,
-            names=headers,  # works but we end have to read the csv upfront, and the column ends up as a row in the df
-            on_bad_lines="skip",
-        )
-        print_df(df)
+    df = pd.read_csv(
+        path,
+        names=_headers,  # works but have to know headers or read csv upfront, and the column ends up as a row in the df
+        on_bad_lines="skip",
+    )
+    print_df(df)
 
 
 def read_csv_pandas_with_pyarrow_engine(path):
@@ -88,6 +88,36 @@ def read_csv_pandas_with_pyarrow_engine(path):
         on_bad_lines="skip",
     )
     print_df(df)
+
+
+def read_csv_pandas_starting_at_first_valid_data_row(path):
+     with open(path, newline="") as file:
+        reader = csv.reader(file)
+
+        idx_header: int = -1
+        idx_first_valid_data_row: int = -1
+
+        for i, row in enumerate(reader):
+            if i == 0 and _is_header(row):
+                idx_header = 0
+                continue
+            if _is_valid_length(row):
+                idx_first_valid_data_row = i
+                break
+        
+        if idx_first_valid_data_row == -1:
+            raise Exception('No valid data rows found')
+        
+        skip_rows = [i for i in range(idx_header, idx_first_valid_data_row)]
+        print("skip_rows:", skip_rows)
+
+        df = pd.read_csv(
+            path,
+            names=_headers,
+            skiprows=skip_rows,
+            on_bad_lines="skip",
+        )
+        print_df(df)
 
 
 def read_csv_pyarrow(path):
@@ -159,6 +189,26 @@ def _print_df_custom(df):
 
 def _print_df_std(df):
     print(df)
+
+
+_headers = ["Index", "First Name", "Middle Name", "Last Name"]
+
+
+def _is_header(row: list[str], headers: list[str] = _headers) -> bool:
+    return _compare_strings(row, headers)
+
+
+def _is_valid_length(row: list[str], length: int = len(_headers)) -> bool:
+    return len(row) == length
+
+
+def _compare_strings(a: list[str], b: list[str]) -> bool:
+    if len(a) != len(b):
+        return False
+    for i in range(len(a)):
+        if a[i] != b[i]:
+            return False
+    return True
 
 
 main()
