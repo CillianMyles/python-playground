@@ -125,6 +125,7 @@ def skip_handler(invalid_row):
 def read_csv_polars(path):
     df = pl.read_csv(
         path,
+        columns=["Index", "First Name", "Middle Name", "Last Name"],
         use_pyarrow=True,
         infer_schema=False,
         ignore_errors=True,
@@ -144,11 +145,20 @@ def validated_int(x: str) -> int:
 
 
 def print_df(df):
+    #_print_df_custom(df)
+    _print_df_std(df)
+
+
+def _print_df_custom(df):
     headers = df.columns.to_list()
     print(f"i=0, len={len(headers)} -> {headers}")
     for i, row in df.iterrows():
         values = row.tolist()
         print(f"i={i}, len={len(values)} -> {values}")
+
+
+def _print_df_std(df):
+    print(df)
 
 
 main()
