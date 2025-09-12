@@ -7,36 +7,16 @@ import pyarrow.csv as pacsv
 
 def main():
     file = "data.csv"
-
-    print_block("Read STD/CSV")
     read_csv_std(file)
-
-    print_block("Validate STD/CSV")
     validate_csv_std(file)
-
-    print_block("Read PANDAS default")
     read_csv_pandas(file)
-
-    print_block("Read PANDAS with provided headers")
     read_csv_pandas_with_provided_headers(file)
-
-    print_block("Read PANDAS with pyarrow engine")
     read_csv_pandas_with_pyarrow_engine(file)
-
-    print_block("Read PYARROW default")
-    read_csv_pyarrow(file)
-
-    print_block("Read PYARROW incremental")
-    read_csv_pyarrow_incremental(file)
-
-    print_block("Read PANDAS starting at first valid data row")
     read_csv_pandas_starting_at_first_valid_data_row(file)
-
-    print_block("Read POLARS default")
-    read_csv_polars(file)
-
-    print_block("Validate PANDAS by type casting")
-    validate_csv_pandas_by_casting(file)
+    read_csv_pyarrow(file)
+    read_csv_pyarrow_incremental(file)
+    #read_csv_polars(file)
+    #validate_csv_pandas_by_casting(file)
 
 
 def print_block(text):
@@ -44,6 +24,7 @@ def print_block(text):
 
 
 def read_csv_std(path):
+    print_block("Read STD/CSV")
     with open(path, newline="") as file:
         reader = csv.reader(file)
         for i, row in enumerate(reader):
@@ -51,6 +32,7 @@ def read_csv_std(path):
 
 
 def validate_csv_std(path):
+    print_block("Validate STD/CSV")
     with open(path, newline="") as file:
         reader = csv.reader(file)
         headers = next(reader)
@@ -65,14 +47,16 @@ def validate_csv_std(path):
 
 
 def read_csv_pandas(path):
+    print_block("Read PANDAS default")
     df = pd.read_csv(
         path,
-        on_bad_lines="error",  # does nothing whether 'warn' or 'skip' - silently moves the columns around - see logs
+        on_bad_lines="skip",  # does nothing whether 'warn' or 'skip' - silently moves the columns around - see logs
     )
     print_df(df)
 
 
 def read_csv_pandas_with_provided_headers(path):
+    print_block("Read PANDAS with provided headers")
     df = pd.read_csv(
         path,
         names=_headers,  # works but have to know headers or read csv upfront, and the column ends up as a row in the df
@@ -82,6 +66,7 @@ def read_csv_pandas_with_provided_headers(path):
 
 
 def read_csv_pandas_with_pyarrow_engine(path):
+    print_block("Read PANDAS with pyarrow engine")
     df = pd.read_csv(
         path,
         engine="pyarrow",  # this gives the desired result, but not fully sure of the implications of switching
@@ -91,36 +76,35 @@ def read_csv_pandas_with_pyarrow_engine(path):
 
 
 def read_csv_pandas_starting_at_first_valid_data_row(path):
-     with open(path, newline="") as file:
+    print_block("Read PANDAS starting at first valid data row")
+    first_valid_data_row: int = -1
+    
+    with open(path, newline="") as file:
         reader = csv.reader(file)
-
-        idx_header: int = -1
-        idx_first_valid_data_row: int = -1
-
         for i, row in enumerate(reader):
             if i == 0 and _is_header(row):
-                idx_header = 0
                 continue
             if _is_valid_length(row):
-                idx_first_valid_data_row = i
+                first_valid_data_row = i
                 break
-        
-        if idx_first_valid_data_row == -1:
-            raise Exception('No valid data rows found')
-        
-        skip_rows = [i for i in range(idx_header, idx_first_valid_data_row)]
-        print("skip_rows:", skip_rows)
+    
+    if first_valid_data_row == -1:
+        raise Exception('No valid data rows found')
+    
+    skip_rows = [i for i in range(first_valid_data_row)]
+    print("skip_rows:", skip_rows)
 
-        df = pd.read_csv(
-            path,
-            names=_headers,
-            skiprows=skip_rows,
-            on_bad_lines="skip",
-        )
-        print_df(df)
+    df = pd.read_csv(
+        path,
+        names=_headers,
+        skiprows=skip_rows,
+        on_bad_lines="skip",
+    )
+    print_df(df)
 
 
 def read_csv_pyarrow(path):
+    print_block("Read PYARROW default")
     table = pacsv.read_csv(
         path,
         parse_options=pacsv.ParseOptions(
@@ -135,6 +119,7 @@ def read_csv_pyarrow(path):
 
 
 def read_csv_pyarrow_incremental(path):
+    print_block("Read PYARROW incremental")
     stream = pacsv.open_csv(
         path,
         parse_options=pacsv.ParseOptions(
@@ -153,6 +138,7 @@ def skip_handler(invalid_row):
 
 
 def read_csv_polars(path):
+    print_block("Read POLARS default")
     df = pl.read_csv(
         path,
         columns=["Index", "First Name", "Middle Name", "Last Name"],
@@ -164,6 +150,7 @@ def read_csv_polars(path):
 
 
 def validate_csv_pandas_by_casting(path):
+    print_block("Validate PANDAS by type casting")
     pd.read_csv(
         path,
         converters={ "Index": validated_int },
