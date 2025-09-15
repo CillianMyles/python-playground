@@ -115,7 +115,7 @@ def read_csv_pyarrow(path: str) -> None:
             invalid_row_handler=skip_handler
         ),
         read_options=pacsv.ReadOptions(
-            block_size=50,
+            column_names=_headers,
         ),
     )
     df = table.to_pandas()
@@ -130,11 +130,12 @@ def read_csv_pyarrow_incremental(path: str) -> None:
             invalid_row_handler=skip_handler
         ),
         read_options=pacsv.ReadOptions(
-            block_size=50,
+            column_names=_headers,
         ),
     )
-    df = stream.read_pandas()
-    print_df(df)
+    for i, chunk in enumerate(stream):
+        df = chunk.to_pandas()
+        print(f"Chunk [{i}]:", df)
 
 
 def skip_handler(invalid_row) -> str:
