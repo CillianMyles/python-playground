@@ -2,7 +2,8 @@ import csv
 import pandas as pd
 import polars as pl
 import pyarrow as pa
-import pyarrow.csv as pacsv
+import pyarrow.csv as pa_csv
+import pyarrow.dataset as pa_ds
 
 
 def main():
@@ -14,7 +15,8 @@ def main():
     read_csv_pandas_with_pyarrow_engine(file)
     read_csv_pandas_starting_at_first_valid_data_row(file)
     read_csv_pyarrow(file)
-    read_csv_pyarrow_incremental(file)
+    read_csv_pyarrow_stream(file)
+    read_csv_pyarrow_batch(file)
     #read_csv_polars(file)
     #validate_csv_pandas_by_casting(file)
 
@@ -109,36 +111,71 @@ def read_csv_pandas_starting_at_first_valid_data_row(path: str) -> None:
 
 def read_csv_pyarrow(path: str) -> None:
     print_block("Read PYARROW default")
-    table = pacsv.read_csv(
+    columns_in_csv = True
+    read_optsions = pa_csv.ReadOptions(
+        column_names=_headers if not columns_in_csv else None,
+        skip_rows=0 if columns_in_csv else None,
+    )
+    parse_options = pa_csv.ParseOptions(
+        invalid_row_handler=_skip_invalid_rows
+    )
+    # convert_options = pa_csv.ConvertOptions()
+    table = pa_csv.read_csv(
         path,
-        parse_options=pacsv.ParseOptions(
-            invalid_row_handler=skip_handler
-        ),
-        read_options=pacsv.ReadOptions(
-            column_names=_headers,
-        ),
+        read_options=read_optsions,
+        parse_options=parse_options,
+        # convert_options=convert_options,
     )
     df = table.to_pandas()
     print_df(df)
 
 
-def read_csv_pyarrow_incremental(path: str) -> None:
-    print_block("Read PYARROW incremental")
-    stream = pacsv.open_csv(
-        path,
-        parse_options=pacsv.ParseOptions(
-            invalid_row_handler=skip_handler
-        ),
-        read_options=pacsv.ReadOptions(
-            column_names=_headers,
-        ),
+def read_csv_pyarrow_stream(path: str) -> None:
+    print_block("Read PYARROW stream")
+    columns_in_csv = True
+    read_optsions = pa_csv.ReadOptions(
+        column_names=_headers if not columns_in_csv else None,
+        skip_rows=0 if columns_in_csv else None,
     )
-    for i, chunk in enumerate(stream):
-        df = chunk.to_pandas()
-        print(f"Chunk [{i}]:", df)
+    parse_options = pa_csv.ParseOptions(
+        invalid_row_handler=_skip_invalid_rows
+    )
+    # convert_options = pa_csv.ConvertOptions()
+    stream = pa_csv.open_csv(
+        path,
+        read_options=read_optsions,
+        parse_options=parse_options,
+        # convert_options=convert_options,
+    )
+    df = stream.read_pandas()
+    print_df(df)
 
 
-def skip_handler(invalid_row) -> str:
+def read_csv_pyarrow_batch(path: str) -> None:
+    print_block("Read PYARROW batch")
+    chunksize = 2
+    columns_in_csv = True
+    read_optsions = pa_csv.ReadOptions(
+        column_names=_headers if not columns_in_csv else None,
+        skip_rows=0 if columns_in_csv else None,
+    )
+    parse_options = pa_csv.ParseOptions(
+        invalid_row_handler=_skip_invalid_rows
+    )
+    # convert_options = pa_csv.ConvertOptions()
+    csv_format = pa_ds.CsvFileFormat(
+        read_options=read_optsions,
+        parse_options=parse_options,
+        # convert_options=convert_options,
+    )
+    dataset = pa_ds.dataset(path, format=csv_format)
+    scanner = pa_ds.Scanner.from_dataset(dataset, batch_size=chunksize)
+    for i, batch in enumerate(scanner.to_batches()):
+        df = pl.from_arrow(batch)
+        print(f"Batch [{i}]:", df)
+
+
+def _skip_invalid_rows(invalid_row: pa_csv.InvalidRow) -> str:
     return "skip"
 
 
