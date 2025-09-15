@@ -119,12 +119,12 @@ def read_csv_pyarrow(path: str) -> None:
     parse_options = pa_csv.ParseOptions(
         invalid_row_handler=_skip_invalid_rows
     )
-    # convert_options = pa_csv.ConvertOptions()
+    convert_options = pa_csv.ConvertOptions()
     table = pa_csv.read_csv(
         path,
         read_options=read_optsions,
         parse_options=parse_options,
-        # convert_options=convert_options,
+        convert_options=convert_options,
     )
     df = table.to_pandas()
     print_df(df)
@@ -140,12 +140,12 @@ def read_csv_pyarrow_stream(path: str) -> None:
     parse_options = pa_csv.ParseOptions(
         invalid_row_handler=_skip_invalid_rows
     )
-    # convert_options = pa_csv.ConvertOptions()
+    convert_options = pa_csv.ConvertOptions()
     stream = pa_csv.open_csv(
         path,
         read_options=read_optsions,
         parse_options=parse_options,
-        # convert_options=convert_options,
+        convert_options=convert_options,
     )
     df = stream.read_pandas()
     print_df(df)
@@ -162,11 +162,11 @@ def read_csv_pyarrow_batch(path: str) -> None:
     parse_options = pa_csv.ParseOptions(
         invalid_row_handler=_skip_invalid_rows
     )
-    # convert_options = pa_csv.ConvertOptions()
+    convert_options = pa_csv.ConvertOptions()
     csv_format = pa_ds.CsvFileFormat(
         read_options=read_optsions,
         parse_options=parse_options,
-        # convert_options=convert_options,
+        convert_options=convert_options,
     )
     dataset = pa_ds.dataset(path, format=csv_format)
     scanner = pa_ds.Scanner.from_dataset(dataset, batch_size=chunksize)
