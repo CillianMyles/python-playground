@@ -3,3 +3,6 @@ pyarrow==21.0.0
 polars==1.33.1
 
 matplotlib==3.10.6
+
+mojo
+# pip install --pre mojo --index-url https://dl.modular.com/public/nightly/python/simple/
