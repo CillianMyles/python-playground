@@ -72,7 +72,7 @@ def read_csv_pandas_with_pyarrow_engine(path: str) -> None:
     df = pd.read_csv(
         path,
         engine="pyarrow",  # this gives the desired result, but not fully sure of the implications of switching
-        on_bad_lines="skip",
+        on_bad_lines=_skip_invalid_rows,
     )
     print_df(df)
 
