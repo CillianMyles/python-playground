@@ -80,26 +80,20 @@ def read_csv_pandas_with_pyarrow_engine(path: str) -> None:
 def read_csv_pandas_starting_at_first_valid_data_row(path: str) -> None:
     print_block("Read PANDAS starting at first valid data row")
 
-    header_row: int = -1
-    first_valid_data_row: int = -1
-    
+    skip_rows = []
     with open(path, newline="") as file:
         reader = csv.reader(file)
         for i, row in enumerate(reader):
-            if i == 0 and _is_header(row):
-                header_row = i
+            if i == 0 and row == _headers:
                 continue
-            if _is_valid_length(row):
-                first_valid_data_row = i
+            elif len(row) != len(_headers):
+                skip_rows.append(i)
+            else:
                 break
-    
-    if first_valid_data_row == -1:
-        raise Exception('No valid data rows found')
-    
-    skip_rows = [i for i in range(header_row + 1, first_valid_data_row)]
+
     config = {
+        "header": 0,
         "names": _headers,
-        "header": header_row if header_row != -1 else None,
         "skiprows": skip_rows,
         "on_bad_lines": "skip",
     }
@@ -221,23 +215,6 @@ def _print_df_std(df) -> None:
 
 
 _headers = ["Index", "First Name", "Middle Name", "Last Name"]
-
-
-def _is_header(row: list[str], headers: list[str] = _headers) -> bool:
-    return _compare_strings(row, headers)
-
-
-def _is_valid_length(row: list[str], length: int = len(_headers)) -> bool:
-    return len(row) == length
-
-
-def _compare_strings(a: list[str], b: list[str]) -> bool:
-    if len(a) != len(b):
-        return False
-    for i in range(len(a)):
-        if a[i] != b[i]:
-            return False
-    return True
 
 
 main()
