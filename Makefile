@@ -25,6 +25,10 @@ install-deps:
 lint:
 	ruff check .
 
+.PHONY: lint-fix
+lint-fix:
+	ruff check . --fix
+
 .PHONY: format
 format:
 	ruff format .
