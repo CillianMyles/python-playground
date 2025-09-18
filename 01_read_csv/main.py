@@ -7,15 +7,15 @@ import pyarrow.csv as pa_csv
 import pyarrow.dataset as pa_ds
 
 
-_csv_data = """
+_csv_string = StringIO(
+    """
 Index,First Name,Middle Name,Last Name
 1,Mr. Al\, B.,grüBen,Johnson
 2,"Mr. Al\, B.",grüBen,Johnson
 3,\"Mr. Al\, B.\",grüBen,Johnson
 4,Mr. Al\, B.,grüBen,Johnson
 """.strip()
-
-_csv_string = StringIO(_csv_data)
+)
 
 _file_path = "01_read_csv/data.csv"
 
