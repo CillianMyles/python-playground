@@ -65,7 +65,7 @@ def main():
     print_spacing()
     print("starting reading CSV outside context manager")
     print_divider()
-    df = pd.read_csv(_valid_first_line_path, **config)
+    pd.read_csv(_valid_first_line_path, **config)
     print_divider()
     print("finished reading CSV outside context manager")
 
@@ -73,7 +73,7 @@ def main():
         print_spacing()
         print("starting reading CSV inside context manager")
         print_divider()
-        df = pd.read_csv(_valid_first_line_path, **config)
+        pd.read_csv(_valid_first_line_path, **config)
         print_divider()
         print("finished reading CSV inside context manager")
 
@@ -85,19 +85,17 @@ def main():
         print(f"Total lines skipped: {len(skipped_lines)}")
         for skip in skipped_lines:
             print(skip)  # Uses __str__ method
-        
+
         # You can also access individual properties
         for skip in skipped_lines:
             print(f"Line {skip.line_number} failed because: {skip.reason}")
-        
+
         # Or filter/analyze them
-        field_count_errors = [
-            skip for skip in skipped_lines if "fields" in skip.reason
-        ]
+        field_count_errors = [skip for skip in skipped_lines if "fields" in skip.reason]
         print(f"Field count errors: {len(field_count_errors)}")
     else:
         print("No lines were skipped")
-    
+
     print_spacing()
 
 
