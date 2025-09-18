@@ -7,3 +7,5 @@ matplotlib==3.10.6
 # custom install command in Makefile:
 # pip install --pre mojo --index-url https://dl.modular.com/public/nightly/python/simple/
 mojo
+
+ruff==0.13.0
