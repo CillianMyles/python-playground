@@ -8,7 +8,7 @@ import pyarrow.dataset as pa_ds
 
 
 _csv_string = StringIO(
-    """
+    r"""
 Index,First Name,Middle Name,Last Name
 1,Mr. Al\, B.,grüBen,Johnson
 2,"Mr. Al\, B.",grüBen,Johnson
