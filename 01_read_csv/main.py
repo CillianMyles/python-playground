@@ -18,7 +18,7 @@ Index,First Name,Middle Name,Last Name
 
 _csv_string = StringIO(_csv_data)
 
-_file_path = "data.csv"
+_file_path = "01_read_csv/data.csv"
 
 _headers = ["Index", "First Name", "Middle Name", "Last Name"]
 
