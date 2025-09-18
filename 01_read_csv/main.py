@@ -230,4 +230,5 @@ def _print_df_std(df) -> None:
     print(df)
 
 
-main()
+if __name__ == "__main__":
+    main()
