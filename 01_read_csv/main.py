@@ -3,7 +3,6 @@ from io import StringIO
 
 import pandas as pd
 import polars as pl
-import pyarrow as pa
 import pyarrow.csv as pa_csv
 import pyarrow.dataset as pa_ds
 
