@@ -41,7 +41,7 @@ ax.yaxis.grid(True, linestyle="--", color=grid_color, alpha=0.5)
 # Add value labels on top of bars
 for bar, value in zip(bars, time_in_seconds):
     ax.text(
-        bar.get_x() + bar.get_width()/2,
+        bar.get_x() + bar.get_width() / 2,
         value + 10,
         value,
         ha="center",

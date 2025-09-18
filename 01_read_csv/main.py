@@ -33,8 +33,8 @@ def main():
     read_csv_pyarrow(_file_path)
     read_csv_pyarrow_stream(_file_path)
     read_csv_pyarrow_batch(_file_path)
-    #read_csv_polars(file)
-    #validate_csv_pandas_by_casting(file)
+    # read_csv_polars(file)
+    # validate_csv_pandas_by_casting(file)
 
 
 def print_block(text: str) -> None:
@@ -126,9 +126,7 @@ def read_csv_pyarrow(file_path: str) -> None:
         column_names=_headers if not columns_in_csv else None,
         skip_rows=0 if columns_in_csv else None,
     )
-    parse_options = pa_csv.ParseOptions(
-        invalid_row_handler=_skip_invalid_rows
-    )
+    parse_options = pa_csv.ParseOptions(invalid_row_handler=_skip_invalid_rows)
     convert_options = pa_csv.ConvertOptions()
     table = pa_csv.read_csv(
         file_path,
@@ -147,9 +145,7 @@ def read_csv_pyarrow_stream(file_path: str) -> None:
         column_names=_headers if not columns_in_csv else None,
         skip_rows=0 if columns_in_csv else None,
     )
-    parse_options = pa_csv.ParseOptions(
-        invalid_row_handler=_skip_invalid_rows
-    )
+    parse_options = pa_csv.ParseOptions(invalid_row_handler=_skip_invalid_rows)
     convert_options = pa_csv.ConvertOptions()
     stream = pa_csv.open_csv(
         file_path,
@@ -169,9 +165,7 @@ def read_csv_pyarrow_batch(file_path: str) -> None:
         column_names=_headers if not columns_in_csv else None,
         skip_rows=0 if columns_in_csv else None,
     )
-    parse_options = pa_csv.ParseOptions(
-        invalid_row_handler=_skip_invalid_rows
-    )
+    parse_options = pa_csv.ParseOptions(invalid_row_handler=_skip_invalid_rows)
     convert_options = pa_csv.ConvertOptions()
     csv_format = pa_ds.CsvFileFormat(
         read_options=read_optsions,
@@ -205,7 +199,7 @@ def validate_csv_pandas_by_casting(csv) -> None:
     print_block("Validate PANDAS by type casting")
     pd.read_csv(
         csv,
-        converters={ "Index": validated_int },
+        converters={"Index": validated_int},
     )
 
 
@@ -214,7 +208,7 @@ def validated_int(x: str) -> int:
 
 
 def print_df(df):
-    #_print_df_custom(df)
+    # _print_df_custom(df)
     _print_df_std(df)
 
 
