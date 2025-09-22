@@ -1,7 +1,8 @@
 from typing import List
 import timeit
 
-SIZE = 1000000
+
+SIZE = 100_000_000
 MAX_ITERS = 100
 COLLECTION = tuple(i for i in range(SIZE))  # Make it aka at compile-time.
 
