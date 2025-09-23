@@ -50,7 +50,7 @@ def log_skipped_lines():
                 )
 
 
-def main():
+def process_csv(file):
     config = {
         "delimiter": ",",
         "escapechar": None,
@@ -65,7 +65,7 @@ def main():
     print_spacing()
     print("starting reading CSV outside context manager")
     print_divider()
-    pd.read_csv(_valid_first_line_path, **config)
+    pd.read_csv(file, **config)
     print_divider()
     print("finished reading CSV outside context manager")
 
@@ -73,7 +73,7 @@ def main():
         print_spacing()
         print("starting reading CSV inside context manager")
         print_divider()
-        pd.read_csv(_valid_first_line_path, **config)
+        pd.read_csv(file, **config)
         print_divider()
         print("finished reading CSV inside context manager")
 
@@ -97,6 +97,11 @@ def main():
         print("No lines were skipped")
 
     print_spacing()
+
+
+def main():
+    process_csv(_valid_first_line_path)
+    # process_csv(_invalid_first_line_path)
 
 
 _headers = ["Index", "First Name", "Middle Name", "Last Name"]
