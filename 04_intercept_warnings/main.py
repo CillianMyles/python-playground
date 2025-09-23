@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 import csv
 from dataclasses import dataclass
+from io import StringIO
 import re
 from typing import List
 import warnings
@@ -58,34 +59,44 @@ def log_skipped_lines():
 class Line:
     number: int
     type: str
-    data: list[str]
+    content: str
+    items: list[str]
 
     def __str__(self):
-        return f'Line [{self.number}] - type: "{self.type}" - items[{len(self.data)}]: {self.data}'
+        return f'Line [{self.number}] - type: "{self.type}" - content: "{self.content}" - items[{len(self.items)}]: {self.items}'
 
     def __repr__(self):
-        return f'Line(number={self.number}, type="{self.type}", items={self.data})'
+        return f'Line(number={self.number}, type="{self.type}", content="{self.content}", items={self.items})'
 
 
 def pre_process_csv(file_path: str) -> list[Line]:
     lines = []
 
     with open(file_path, newline="") as file:
-        reader = csv.reader(file)
-        headers = next(reader)
-        if headers != _headers:
-            raise ValueError(
-                f"Headers mismatch... expected {_headers} but got {headers}"
+        for i, line in enumerate(file):
+            line = line.rstrip("\r\n")
+            reader = csv.reader(
+                StringIO(line),
+                delimiter=",",
+                escapechar=None,
+                quoting=csv.QUOTE_MINIMAL,
+                doublequote=True,
             )
+            row = next(reader)
 
-        lines.append(Line(number=0, type=TYPE_HEADER, data=headers))
-        num_columns = len(headers)
-
-        for i, row in enumerate(reader, start=1):
-            if len(row) != num_columns:
-                lines.append(Line(number=i, type=TYPE_INVALID, data=row))
+            if i == 0:
+                if row != _headers:
+                    raise ValueError(
+                        f"Headers mismatch... expected {_headers} but got {row}"
+                    )
+                else:
+                    lines.append(
+                        Line(number=0, type=TYPE_HEADER, content=line, items=row)
+                    )
+            elif len(row) != len(_headers):
+                lines.append(Line(number=i, type=TYPE_INVALID, content=line, items=row))
             else:
-                lines.append(Line(number=i, type=TYPE_VALID, data=row))
+                lines.append(Line(number=i, type=TYPE_VALID, content=line, items=row))
 
     return lines
 
@@ -108,23 +119,51 @@ def get_csv_config(file_path: str) -> dict:
         "escapechar": None,
         "quoting": csv.QUOTE_MINIMAL,
         "doublequote": True,
-        "header": 0 if header else None,
-        "names": _headers,
-        "skiprows": skip_rows,
         "on_bad_lines": "warn",
+        "names": _headers,
+        "header": 0 if header else None,
+        "skiprows": skip_rows,
     }
+
+    # === DELIBERATELY PRODUCE ERROR MESSAGE(S) FOR SKIPPED LINES === #
+    if skip_rows:
+        fake_lines = []
+        for line in lines:
+            if line.type == TYPE_HEADER:
+                fake_lines.append(line)
+                break
+        for line in lines:
+            if line.type == TYPE_VALID:
+                fake_lines.append(line)
+                break
+        for i in skip_rows:
+            fake_lines.append(lines[i])
+        fake_data = []
+        for line in fake_lines:
+            print(line)
+            fake_data.append(line.content)
+        fake_csv = "\n".join(fake_data)
+        print("fake_csv:", fake_csv)
+        pd.read_csv(
+            StringIO(fake_csv),
+            delimiter=",",
+            escapechar=None,
+            quoting=csv.QUOTE_MINIMAL,
+            doublequote=True,
+            on_bad_lines="warn",
+            names=_headers,
+            header=0 if header else None,
+        )
+    # === END === #
 
     return config
 
 
 def process_csv(file_path: str) -> None:
     print_spacing()
-    config = get_csv_config(file_path)
-    print("config:", config)
-
-    print_spacing()
     print("starting reading CSV outside context manager")
     print_divider()
+    config = get_csv_config(file_path)
     pd.read_csv(file_path, **config)
     print_divider()
     print("finished reading CSV outside context manager")
@@ -133,6 +172,7 @@ def process_csv(file_path: str) -> None:
         print_spacing()
         print("starting reading CSV inside context manager")
         print_divider()
+        config = get_csv_config(file_path)
         pd.read_csv(file_path, **config)
         print_divider()
         print("finished reading CSV inside context manager")
