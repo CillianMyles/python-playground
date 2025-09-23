@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 import csv
 from dataclasses import dataclass
-from io import StringIO
 import re
 from typing import List
 import warnings
@@ -91,23 +90,37 @@ def pre_process_csv(file_path: str) -> list[Line]:
     return lines
 
 
-def process_csv(file_path: str) -> None:
+def get_csv_config(file_path: str) -> dict:
     lines = pre_process_csv(file_path)
-    for line in lines:
-        print(line)
 
+    header = False
+    skip_rows = []
+    for i, line in enumerate(lines):
+        if i == 0 and line.type == TYPE_HEADER:
+            header = True
+        elif line.type == TYPE_INVALID:
+            skip_rows.append(i)
+        else:
+            break
 
-def _process_csv(file_path: str) -> None:
     config = {
         "delimiter": ",",
         "escapechar": None,
         "quoting": csv.QUOTE_MINIMAL,
         "doublequote": True,
-        "header": None,
+        "header": 0 if header else None,
         "names": _headers,
-        "skiprows": [0] if first_data_line_valid else [0, 1],
+        "skiprows": skip_rows,
         "on_bad_lines": "warn",
     }
+
+    return config
+
+
+def process_csv(file_path: str) -> None:
+    print_spacing()
+    config = get_csv_config(file_path)
+    print("config:", config)
 
     print_spacing()
     print("starting reading CSV outside context manager")
