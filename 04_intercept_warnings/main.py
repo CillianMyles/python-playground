@@ -9,17 +9,22 @@ import warnings
 import pandas as pd
 
 
+TYPE_HEADER = "header"
+TYPE_VALID = "valid"
+TYPE_INVALID = "invalid"
+
+
 @dataclass
 class SkippedLine:
-    line_number: int
+    number: int
     reason: str
     raw_message: str
 
     def __str__(self):
-        return f"Line {self.line_number}: {self.reason}"
+        return f"Line [{self.number}]: {self.reason}"
 
     def __repr__(self):
-        return f"SkippedLine(line_number={self.line_number}, reason='{self.reason}')"
+        return f'SkippedLine(number={self.number}, reason="{self.reason}", raw_message="{self.raw_message}")'
 
 
 @contextmanager
@@ -35,22 +40,64 @@ def log_skipped_lines():
         yield skipped_lines
 
     # process after the block runs
-    for w in warning_list:
-        msg = str(w.message)
+    for warning in warning_list:
+        message = str(warning.message)
         # pandas sometimes emits multiple "Skipping line ..." lines in one warning
-        for line in msg.splitlines():
-            m = re.search(r"Skipping line(?:s)?\s+(\d+)\s*:\s*(.+)", line)
-            if m:
+        for line in message.splitlines():
+            match = re.search(r"Skipping line(?:s)?\s+(\d+)\s*:\s*(.+)", line)
+            if match:
                 skipped_lines.append(
                     SkippedLine(
-                        line_number=int(m.group(1)),
-                        reason=m.group(2),
+                        number=int(match.group(1)),
+                        reason=match.group(2),
                         raw_message=line,
                     )
                 )
 
 
-def process_csv(file, first_data_line_valid: bool):
+@dataclass
+class Line:
+    number: int
+    type: str
+    data: list[str]
+
+    def __str__(self):
+        return f'Line [{self.number}] - type: "{self.type}" - items[{len(self.data)}]: {self.data}'
+
+    def __repr__(self):
+        return f'Line(number={self.number}, type="{self.type}", items={self.data})'
+
+
+def pre_process_csv(file_path: str) -> list[Line]:
+    lines = []
+
+    with open(file_path, newline="") as file:
+        reader = csv.reader(file)
+        headers = next(reader)
+        if headers != _headers:
+            raise ValueError(
+                f"Headers mismatch... expected {_headers} but got {headers}"
+            )
+
+        lines.append(Line(number=0, type=TYPE_HEADER, data=headers))
+        num_columns = len(headers)
+
+        for i, row in enumerate(reader, start=1):
+            if len(row) != num_columns:
+                lines.append(Line(number=i, type=TYPE_INVALID, data=row))
+            else:
+                lines.append(Line(number=i, type=TYPE_VALID, data=row))
+
+    return lines
+
+
+def process_csv(file_path: str) -> None:
+    lines = pre_process_csv(file_path)
+    for line in lines:
+        print(line)
+
+
+def _process_csv(file_path: str) -> None:
     config = {
         "delimiter": ",",
         "escapechar": None,
@@ -65,7 +112,7 @@ def process_csv(file, first_data_line_valid: bool):
     print_spacing()
     print("starting reading CSV outside context manager")
     print_divider()
-    pd.read_csv(file, **config)
+    pd.read_csv(file_path, **config)
     print_divider()
     print("finished reading CSV outside context manager")
 
@@ -73,7 +120,7 @@ def process_csv(file, first_data_line_valid: bool):
         print_spacing()
         print("starting reading CSV inside context manager")
         print_divider()
-        pd.read_csv(file, **config)
+        pd.read_csv(file_path, **config)
         print_divider()
         print("finished reading CSV inside context manager")
 
@@ -85,7 +132,7 @@ def process_csv(file, first_data_line_valid: bool):
         print(f"Total invalid lines skipped: {len(skipped_lines)}")
 
         for skip in skipped_lines:
-            print(f"Line {skip.line_number} skipped because: {skip.reason}")
+            print(f"Line {skip.number} skipped because: {skip.reason}")
     else:
         print("No lines were skipped")
 
@@ -93,34 +140,14 @@ def process_csv(file, first_data_line_valid: bool):
 
 
 def main():
-    # process_csv(_valid_first_line_path, first_data_line_valid=True)
-    process_csv(_invalid_first_line_path, first_data_line_valid=False)
+    # process_csv(_valid_first_line_path)
+    process_csv(_invalid_first_line_path)
 
 
 _headers = ["Index", "First Name", "Middle Name", "Last Name"]
 
 _valid_first_line_path = "04_intercept_warnings/first_line_valid.csv"
 _invalid_first_line_path = "04_intercept_warnings/first_line_invalid.csv"
-
-_valid_first_line_csv = StringIO(
-    r"""
-Index,First Name,Middle Name,Last Name
-1,"Mr. Al\, B.",grüBen,Johnson
-2,Mr. Al\, B.,grüBen,Johnson
-3,\"Mr. Al\, B.\",grüBen,Johnson
-4,Mr. Al\, B.,grüBen,Johnson
-""".strip()
-)
-
-_invalid_first_line_csv = StringIO(
-    r"""
-Index,First Name,Middle Name,Last Name
-1,Mr. Al\, B.,grüBen,Johnson
-2,"Mr. Al\, B.",grüBen,Johnson
-3,\"Mr. Al\, B.\",grüBen,Johnson
-4,Mr. Al\, B.,grüBen,Johnson
-""".strip()
-)
 
 
 def print_spacing(lines: int = 2) -> None:
