@@ -151,9 +151,9 @@ def process_csv(input_path: str, output_path: str) -> None:
 
         if invalid_lines:
             output_file.write(f"Total invalid lines skipped: {len(invalid_lines)}\n")
-            for skip in invalid_lines:
+            for line in invalid_lines:
                 output_file.write(
-                    f"Line {skip.number} skipped because: {skip.reason}\n"
+                    f"Line {line.number} skipped because: {line.reason}\n"
                 )
         else:
             output_file.write("No lines were skipped\n")
