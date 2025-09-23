@@ -50,7 +50,7 @@ def log_skipped_lines():
                 )
 
 
-def process_csv(file):
+def process_csv(file, first_data_line_valid: bool):
     config = {
         "delimiter": ",",
         "escapechar": None,
@@ -58,7 +58,7 @@ def process_csv(file):
         "doublequote": True,
         "header": None,
         "names": _headers,
-        "skiprows": [0],
+        "skiprows": [0] if first_data_line_valid else [0, 1],
         "on_bad_lines": "warn",
     }
 
@@ -82,17 +82,10 @@ def process_csv(file):
     print_divider()
 
     if skipped_lines:
-        print(f"Total lines skipped: {len(skipped_lines)}")
-        for skip in skipped_lines:
-            print(skip)  # Uses __str__ method
+        print(f"Total invalid lines skipped: {len(skipped_lines)}")
 
-        # You can also access individual properties
         for skip in skipped_lines:
-            print(f"Line {skip.line_number} failed because: {skip.reason}")
-
-        # Or filter/analyze them
-        field_count_errors = [skip for skip in skipped_lines if "fields" in skip.reason]
-        print(f"Field count errors: {len(field_count_errors)}")
+            print(f"Line {skip.line_number} skipped because: {skip.reason}")
     else:
         print("No lines were skipped")
 
@@ -100,8 +93,8 @@ def process_csv(file):
 
 
 def main():
-    process_csv(_valid_first_line_path)
-    # process_csv(_invalid_first_line_path)
+    # process_csv(_valid_first_line_path, first_data_line_valid=True)
+    process_csv(_invalid_first_line_path, first_data_line_valid=False)
 
 
 _headers = ["Index", "First Name", "Middle Name", "Last Name"]

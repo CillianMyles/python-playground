@@ -17,8 +17,7 @@ finished reading CSV inside context manager
 
 processing warnings captured
 ==================================================
-Total invalid lines skipped: 3
-Line 3 skipped because: expected 4 fields, saw 5
+Total invalid lines skipped: 2
 Line 4 skipped because: expected 4 fields, saw 5
 Line 5 skipped because: expected 4 fields, saw 5
 
