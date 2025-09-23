@@ -15,20 +15,33 @@ TYPE_INVALID = "invalid"
 
 
 @dataclass
+class Line:
+    number: int
+    type: str
+    content: str
+    items: list[str]
+
+    def __str__(self):
+        return f'Line [{self.number}] - type: "{self.type}" - content: "{self.content}" - items[{len(self.items)}]: {self.items}'
+
+    def __repr__(self):
+        return f'Line(number={self.number}, type="{self.type}", content="{self.content}", items={self.items})'
+
+
+@dataclass
 class SkippedLine:
     number: int
     reason: str
-    raw_message: str
 
     def __str__(self):
         return f"Line [{self.number}]: {self.reason}"
 
     def __repr__(self):
-        return f'SkippedLine(number={self.number}, reason="{self.reason}", raw_message="{self.raw_message}")'
+        return f'SkippedLine(number={self.number}, reason="{self.reason}")'
 
 
 @contextmanager
-def log_skipped_lines():
+def watch_skipped_line_warnings():
     """
     Context manager that yields a list of SkippedLine objects.
     Captures pandas ParserWarning messages from read_csv(on_bad_lines="warn").
@@ -50,23 +63,8 @@ def log_skipped_lines():
                     SkippedLine(
                         number=int(match.group(1)),
                         reason=match.group(2),
-                        raw_message=line,
                     )
                 )
-
-
-@dataclass
-class Line:
-    number: int
-    type: str
-    content: str
-    items: list[str]
-
-    def __str__(self):
-        return f'Line [{self.number}] - type: "{self.type}" - content: "{self.content}" - items[{len(self.items)}]: {self.items}'
-
-    def __repr__(self):
-        return f'Line(number={self.number}, type="{self.type}", content="{self.content}", items={self.items})'
 
 
 def pre_process_csv(file_path: str) -> list[Line]:
@@ -101,7 +99,7 @@ def pre_process_csv(file_path: str) -> list[Line]:
     return lines
 
 
-def get_csv_config(file_path: str) -> dict:
+def get_csv_config(file_path: str):
     lines = pre_process_csv(file_path)
 
     header = False
@@ -125,71 +123,37 @@ def get_csv_config(file_path: str) -> dict:
         "skiprows": skip_rows,
     }
 
-    # === DELIBERATELY PRODUCE ERROR MESSAGE(S) FOR SKIPPED LINES === #
+    skipped_lines = None
     if skip_rows:
-        fake_lines = []
-        for line in lines:
-            if line.type == TYPE_HEADER:
-                fake_lines.append(line)
-                break
-        for line in lines:
-            if line.type == TYPE_VALID:
-                fake_lines.append(line)
-                break
+        skipped_lines = []
         for i in skip_rows:
-            fake_lines.append(lines[i])
-        fake_data = []
-        for line in fake_lines:
-            print(line)
-            fake_data.append(line.content)
-        fake_csv = "\n".join(fake_data)
-        print("fake_csv:", fake_csv)
-        pd.read_csv(
-            StringIO(fake_csv),
-            delimiter=",",
-            escapechar=None,
-            quoting=csv.QUOTE_MINIMAL,
-            doublequote=True,
-            on_bad_lines="warn",
-            names=_headers,
-            header=0 if header else None,
-        )
-    # === END === #
+            line = lines[i]
+            skipped_line = SkippedLine(
+                number=line.number,
+                reason=f"expected {len(_headers)} fields, saw {len(line.items)}",
+            )
+            skipped_lines.append(skipped_line)
 
-    return config
+    return skipped_lines, config
 
 
 def process_csv(file_path: str) -> None:
-    print_spacing()
-    print("starting reading CSV outside context manager")
-    print_divider()
-    config = get_csv_config(file_path)
-    pd.read_csv(file_path, **config)
-    print_divider()
-    print("finished reading CSV outside context manager")
-
-    with log_skipped_lines() as skipped_lines:
-        print_spacing()
-        print("starting reading CSV inside context manager")
-        print_divider()
-        config = get_csv_config(file_path)
+    with watch_skipped_line_warnings() as warned_lines:
+        skipped_lines, config = get_csv_config(file_path)
         pd.read_csv(file_path, **config)
-        print_divider()
-        print("finished reading CSV inside context manager")
 
-    print_spacing()
-    print("processing warnings captured")
-    print_divider()
-
+    invalid_lines = []
     if skipped_lines:
-        print(f"Total invalid lines skipped: {len(skipped_lines)}")
+        invalid_lines.extend(skipped_lines)
+    if warned_lines:
+        invalid_lines.extend(warned_lines)
 
-        for skip in skipped_lines:
+    if invalid_lines:
+        print(f"Total invalid lines skipped: {len(invalid_lines)}")
+        for skip in invalid_lines:
             print(f"Line {skip.number} skipped because: {skip.reason}")
     else:
         print("No lines were skipped")
-
-    print_spacing()
 
 
 def main():
