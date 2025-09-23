@@ -1,0 +1,2 @@
+# allow logs in this directory (since they are globally ignored)
+!*.log
