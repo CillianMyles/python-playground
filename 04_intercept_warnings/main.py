@@ -137,46 +137,40 @@ def get_csv_config(file_path: str):
     return skipped_lines, config
 
 
-def process_csv(file_path: str) -> None:
-    with watch_skipped_line_warnings() as warned_lines:
-        skipped_lines, config = get_csv_config(file_path)
-        pd.read_csv(file_path, **config)
+def process_csv(input_path: str, output_path: str) -> None:
+    with open(output_path, "w") as output_file:
+        with watch_skipped_line_warnings() as warned_lines:
+            skipped_lines, config = get_csv_config(input_path)
+            pd.read_csv(input_path, **config)
 
-    invalid_lines = []
-    if skipped_lines:
-        invalid_lines.extend(skipped_lines)
-    if warned_lines:
-        invalid_lines.extend(warned_lines)
+        invalid_lines = []
+        if skipped_lines:
+            invalid_lines.extend(skipped_lines)
+        if warned_lines:
+            invalid_lines.extend(warned_lines)
 
-    if invalid_lines:
-        print(f"Total invalid lines skipped: {len(invalid_lines)}")
-        for skip in invalid_lines:
-            print(f"Line {skip.number} skipped because: {skip.reason}")
-    else:
-        print("No lines were skipped")
+        if invalid_lines:
+            output_file.write(f"Total invalid lines skipped: {len(invalid_lines)}\n")
+            for skip in invalid_lines:
+                output_file.write(
+                    f"Line {skip.number} skipped because: {skip.reason}\n"
+                )
+        else:
+            output_file.write("No lines were skipped\n")
 
 
 def main():
-    # process_csv(_valid_first_line_path)
-    process_csv(_invalid_first_line_path)
+    process_csv(
+        input_path="04_intercept_warnings/first_line_valid.csv",
+        output_path="04_intercept_warnings/output_first_line_valid.log",
+    )
+    process_csv(
+        input_path="04_intercept_warnings/first_line_invalid.csv",
+        output_path="04_intercept_warnings/output_first_line_invalid.log",
+    )
 
 
 _headers = ["Index", "First Name", "Middle Name", "Last Name"]
-
-_valid_first_line_path = "04_intercept_warnings/first_line_valid.csv"
-_invalid_first_line_path = "04_intercept_warnings/first_line_invalid.csv"
-
-
-def print_spacing(lines: int = 2) -> None:
-    print_repeated("\n", lines)
-
-
-def print_divider(char: str = "=", times: int = 50) -> None:
-    print_repeated(char, times)
-
-
-def print_repeated(text: str, times: int) -> None:
-    print(text * times)
 
 
 if __name__ == "__main__":

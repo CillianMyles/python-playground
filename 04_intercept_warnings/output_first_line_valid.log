@@ -1,26 +1,4 @@
-
-
-
-starting reading CSV outside context manager
-==================================================
-==================================================
-finished reading CSV outside context manager
-
-
-
-starting reading CSV inside context manager
-==================================================
-==================================================
-finished reading CSV inside context manager
-
-
-
-processing warnings captured
-==================================================
 Total invalid lines skipped: 3
 Line 3 skipped because: expected 4 fields, saw 5
 Line 4 skipped because: expected 4 fields, saw 5
 Line 5 skipped because: expected 4 fields, saw 5
-
-
-
