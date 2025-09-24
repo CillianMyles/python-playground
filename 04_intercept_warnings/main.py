@@ -130,10 +130,11 @@ def get_csv_config(
     has_header = len(lines) > 0 and lines[0].type is LineType.HEADER
     skip_rows_0_based: list[int] = []
 
-    for i, line in enumerate(lines, start=1):  # i is 1-based index into file
-        if i == 1 and line.type is LineType.HEADER:
+    start = 1  # i is 1-based index into file
+    for i, line in enumerate(lines, start=start):
+        if i == start and line.type is LineType.HEADER:
             continue
-        if line.type is LineType.INVALID:
+        elif line.type is LineType.INVALID:
             skip_rows_0_based.append(
                 line.number - 1
             )  # pandas expects 0-based row indices
@@ -190,13 +191,17 @@ def process_csv(
 
 def main() -> None:
     HEADERS = ["Index", "First Name", "Middle Name", "Last Name"]
-
+    
+    process_csv(
+        input_path=Path("04_intercept_warnings/all_lines_valid.csv"),
+        output_path=Path("04_intercept_warnings/output_all_lines_valid.log"),
+        headers=HEADERS,
+    )
     process_csv(
         input_path=Path("04_intercept_warnings/first_line_valid.csv"),
         output_path=Path("04_intercept_warnings/output_first_line_valid.log"),
         headers=HEADERS,
     )
-
     process_csv(
         input_path=Path("04_intercept_warnings/first_line_invalid.csv"),
         output_path=Path("04_intercept_warnings/output_first_line_invalid.log"),
