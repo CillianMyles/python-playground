@@ -1,4 +1,4 @@
 Total invalid lines skipped: 3
-Line 1 skipped because: expected 4 fields, saw 5
+Line 2 skipped because: expected 4 fields, saw 5
 Line 4 skipped because: expected 4 fields, saw 5
 Line 5 skipped because: expected 4 fields, saw 5
