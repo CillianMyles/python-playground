@@ -64,18 +64,17 @@ def watch_skipped_line_warnings():
     """
     collected: List[SkippedLine] = []
 
-    with warnings.catch_warnings(record=True) as wlist:
+    with warnings.catch_warnings(record=True) as warningz:
         warnings.filterwarnings("always", category=pd.errors.ParserWarning)
         yield collected
 
-    for w in wlist:
-        msg = str(w.message)
-        for line in msg.splitlines():
-            if m := _SKIP_RE.search(line):
-                # may contain "2, 5, 9"
-                nums = [int(s) for s in m.group(1).replace(" ", "").split(",") if s]
-                reason = m.group(2)
-                collected.extend(SkippedLine(number=n, reason=reason) for n in nums)
+    for warning in warningz:
+        message = str(warning.message)
+        for line in message.splitlines():
+            if matches := _SKIP_RE.search(line):
+                numbers = [int(s) for s in matches.group(1).replace(" ", "").split(",") if s]
+                reason = matches.group(2)
+                collected.extend(SkippedLine(number=n, reason=reason) for n in numbers)
 
 
 def pre_process_csv(file_path: Path | str, headers: list[str]) -> list[Line]:
@@ -86,12 +85,12 @@ def pre_process_csv(file_path: Path | str, headers: list[str]) -> list[Line]:
     path = Path(file_path)
     lines: list[Line] = []
 
-    with path.open("r", encoding="utf-8", newline="") as f:
-        for n, raw in enumerate(f, start=1):  # 1-based
-            text = raw.rstrip("\r\n")
+    with path.open("r", encoding="utf-8", newline="") as file:
+        for i, raw in enumerate(file, start=1):  # 1-based
+            line = raw.rstrip("\r\n")
             row = next(
                 csv.reader(
-                    StringIO(text),
+                    StringIO(line),
                     delimiter=",",
                     escapechar=None,
                     quoting=csv.QUOTE_MINIMAL,
@@ -99,21 +98,22 @@ def pre_process_csv(file_path: Path | str, headers: list[str]) -> list[Line]:
                 ),
                 [],
             )
-            if n == 1:
+
+            if i == 1:  # 1-based
                 if row != headers:
                     raise ValueError(
                         f"Header mismatch: expected {headers!r} but got {row!r}"
                     )
                 lines.append(
-                    Line(number=n, type=LineType.HEADER, content=text, items=row)
+                    Line(number=i, type=LineType.HEADER, content=line, items=row)
                 )
             elif len(row) != len(headers):
                 lines.append(
-                    Line(number=n, type=LineType.INVALID, content=text, items=row)
+                    Line(number=i, type=LineType.INVALID, content=line, items=row)
                 )
             else:
                 lines.append(
-                    Line(number=n, type=LineType.VALID, content=text, items=row)
+                    Line(number=i, type=LineType.VALID, content=line, items=row)
                 )
 
     return lines
@@ -132,9 +132,7 @@ def get_csv_config(
         if i == 1 and line.type is LineType.HEADER:
             continue
         if line.type is LineType.INVALID:
-            skip_rows_0_based.append(
-                line.number - 1
-            )  # pandas expects 0-based row indices
+            skip_rows_0_based.append(line.number - 1) # pandas expects 0-based row indices
         else:
             break
 
@@ -153,10 +151,10 @@ def get_csv_config(
     if skip_rows_0_based:
         skipped_lines = [
             SkippedLine(
-                number=idx + 1,  # back to 1-based
-                reason=f"expected {len(headers)} fields, saw {len(lines[idx].items)}",
+                number=i + 1,  # back to 1-based
+                reason=f"expected {len(headers)} fields, saw {len(lines[i].items)}",
             )
-            for idx in skip_rows_0_based
+            for i in skip_rows_0_based
         ]
 
     return skipped_lines, config
@@ -165,9 +163,9 @@ def get_csv_config(
 def process_csv(
     input_path: Path | str, output_path: Path | str, headers: list[str]
 ) -> None:
-    out = Path(output_path)
+    path = Path(output_path)
 
-    with out.open("w", encoding="utf-8", newline="\n") as fp:
+    with path.open("w", encoding="utf-8", newline="\n") as file:
         with watch_skipped_line_warnings() as warned_lines:
             skipped_lines, config = get_csv_config(input_path, headers)
             pd.read_csv(input_path, **config)
@@ -179,11 +177,11 @@ def process_csv(
             invalid.extend(warned_lines)
 
         if invalid:
-            fp.write(f"Total invalid lines skipped: {len(invalid)}\n")
+            file.write(f"Total invalid lines skipped: {len(invalid)}\n")
             for sl in invalid:
-                fp.write(f"Line {sl.number} skipped because: {sl.reason}\n")
+                file.write(f"Line {sl.number} skipped because: {sl.reason}\n")
         else:
-            fp.write("No lines were skipped\n")
+            file.write("No lines were skipped\n")
 
 
 def main() -> None:
