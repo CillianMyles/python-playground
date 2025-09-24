@@ -3,8 +3,8 @@ from collections import List
 
 
 alias SIZE = 1000000
-alias NUM_WARMUP = 0
 alias MAX_ITERS = 100
+alias NUM_WARMUP = 0
 
 
 fn mojo_binary_search(element: Int, array: List[Int]) -> Int:
