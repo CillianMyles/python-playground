@@ -72,7 +72,9 @@ def watch_skipped_line_warnings():
         message = str(warning.message)
         for line in message.splitlines():
             if matches := _SKIP_RE.search(line):
-                numbers = [int(s) for s in matches.group(1).replace(" ", "").split(",") if s]
+                numbers = [
+                    int(s) for s in matches.group(1).replace(" ", "").split(",") if s
+                ]
                 reason = matches.group(2)
                 collected.extend(SkippedLine(number=n, reason=reason) for n in numbers)
 
@@ -132,7 +134,9 @@ def get_csv_config(
         if i == 1 and line.type is LineType.HEADER:
             continue
         if line.type is LineType.INVALID:
-            skip_rows_0_based.append(line.number - 1) # pandas expects 0-based row indices
+            skip_rows_0_based.append(
+                line.number - 1
+            )  # pandas expects 0-based row indices
         else:
             break
 
