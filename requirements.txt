@@ -9,3 +9,5 @@ matplotlib==3.10.6
 mojo
 
 ruff==0.13.0
+
+snakeviz==2.2.2
