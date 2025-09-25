@@ -13,7 +13,6 @@ verify-venv:
 	python -m pip --version
 
 install-deps:
-	$(PYTHON) -m pip install --pre mojo --index-url https://dl.modular.com/public/nightly/python/simple
 	$(PYTHON) -m pip install -r requirements.txt
 
 destroy-venv:

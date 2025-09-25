@@ -191,7 +191,7 @@ def process_csv(
 
 def main() -> None:
     HEADERS = ["Index", "First Name", "Middle Name", "Last Name"]
-    
+
     process_csv(
         input_path=Path("04_intercept_warnings/all_lines_valid.csv"),
         output_path=Path("04_intercept_warnings/output_all_lines_valid.log"),
