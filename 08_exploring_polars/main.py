@@ -1,6 +1,9 @@
 import polars as pl
 
 
+__dir__ = "08_exploring_polars"
+
+
 def main():
     plan = pl.LazyFrame(
         {
@@ -22,7 +25,7 @@ def main():
     print("select_df:", select_df)
 
     # read directly from csv file
-    data = pl.scan_csv("08_exploring_polars/retail_transactions.csv")
+    data = pl.scan_csv(f"{__dir__}/retail_transactions.csv")
     print("schema:", data.collect_schema())
     print("head:", data.head().collect())
 
@@ -53,6 +56,9 @@ def main():
         .collect()
     )
     print("best_performing_categories:", best_performing_categories)
+
+    plot = best_performing_categories.plot.bar(x="ProductCategory", y="Total")
+    plot.save(f"{__dir__}/plot.png")
 
 
 if __name__ == "__main__":

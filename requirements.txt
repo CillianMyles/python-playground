@@ -9,3 +9,6 @@ mojo==0.25.6.0
 ruff==0.13.0
 
 snakeviz==2.2.2
+
+altair==5.5.0
+vl-convert-python==1.8.0
