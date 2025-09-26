@@ -2,12 +2,11 @@ from typing import List
 import timeit
 
 
-SIZE = 100_000_000
+SIZE = 1_000_000
 MAX_ITERS = 100
-COLLECTION = tuple(i for i in range(SIZE))  # Make it aka at compile-time.
 
 
-def python_binary_search(element: int, array: List[int]) -> int:
+def binary_search(element: int, array: List[int]) -> int:
     start = 0
     stop = len(array) - 1
     while start <= stop:
@@ -22,11 +21,19 @@ def python_binary_search(element: int, array: List[int]) -> int:
     return -1
 
 
-def test_python_binary_search():
-    _ = python_binary_search(SIZE - 1, COLLECTION)
+# create at compile-time, so not optimised away by compiler
+def get_collection() -> List[int]:
+    return tuple(i for i in range(SIZE))
 
 
-print(
-    "Average execution time of func in sec",
-    timeit.timeit(lambda: test_python_binary_search(), number=MAX_ITERS),
-)
+def main():
+    time_s = timeit.timeit(
+        lambda: binary_search(SIZE - 1, get_collection()),
+        number=MAX_ITERS,
+    )
+    time_ms = time_s * 1_000_000
+    print(f"{time_ms} ms - {SIZE!r} items - binary search - Python")
+
+
+if __name__ == "__main__":
+    main()

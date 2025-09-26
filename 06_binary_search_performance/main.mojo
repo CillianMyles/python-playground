@@ -1,18 +1,19 @@
-from benchmark import run, keep
+import benchmark
+from benchmark import Unit
 from collections import List
 
 
-alias SIZE = 1000000
+alias SIZE = 1_000_000
 alias MAX_ITERS = 100
 alias NUM_WARMUP = 0
 
 
-fn mojo_binary_search(element: Int, array: List[Int]) -> Int:
+fn binary_search(element: Int, array: List[Int]) -> Int:
     var start = 0
     var stop = len(array) - 1
     while start <= stop:
-        let index = (start + stop) // 2
-        let pivot = array[index]
+        var index = (start + stop) // 2
+        var pivot = array[index]
         if pivot == element:
             return index
         elif pivot > element:
@@ -22,22 +23,20 @@ fn mojo_binary_search(element: Int, array: List[Int]) -> Int:
     return -1
 
 
-@parameter  # statement runs at compile-time.
+# create at compile-time, so not optimised away by compiler
+@parameter
 fn get_collection() -> List[Int]:
-    var v = List[Int](SIZE)
+    var list = List[Int](SIZE)
     for i in range(SIZE):
-        v.append(i)
-    return v
+        list.append(i)
+    return list
 
 
-fn test_mojo_binary_search() -> Float64:
-    fn test_closure():
-        _ = mojo_binary_search(SIZE - 1, get_collection())
-    return Float64(run[test_closure] benchmark(NUM_WARMUP, MAX_ITERS).run[test_closure]()) / 1e9
+fn main() raises:
+    fn measure():
+        _ = binary_search(SIZE - 1, get_collection())
 
-
-fn main():
-    print(
-        "Average execution time of func in sec ",
-        test_mojo_binary_search(),
-    )
+    var report = benchmark.run[measure](NUM_WARMUP, MAX_ITERS)
+    var time_s = report.mean()
+    var time_ms = time_s * 1e6
+    print("{} ms - {} items - binary search - Mojo".format(time_ms, SIZE))
