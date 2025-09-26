@@ -41,6 +41,15 @@ def main():
     )
     print("books_totals:", books_totals)
 
+    # list product catgories which have the biggest total amounts spent cummulatively
+    best_performing_categories = (
+        data.group_by("ProductCategory")
+        .agg(pl.sum("TotalAmount"))
+        .sort(by="TotalAmount", descending=True)
+        .collect()
+    )
+    print("best_performing_categories:", best_performing_categories)
+
 
 if __name__ == "__main__":
     main()
