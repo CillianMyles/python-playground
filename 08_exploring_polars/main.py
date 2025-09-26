@@ -57,6 +57,7 @@ def main():
     )
     print("best_performing_categories:", best_performing_categories)
 
+    # graph the previous data frame/set
     plot = best_performing_categories.plot.bar(x="ProductCategory", y="Total")
     plot.save(f"{__dir__}/plot.png")
 
