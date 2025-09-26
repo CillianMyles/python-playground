@@ -58,10 +58,13 @@ def main():
     bar = best_performing_categories.plot.bar(
         x="ProductCategory",
         y="Total",
-    ).properties(width=500)
+    ).properties(
+        width=500,
+        title="Best Performing Product Categories",
+    )
     bar.save(f"{__dir__}/bar.png")
 
-    # scatter
+    # scatter plot of transactions
     scatter = (
         data.collect()
         .plot.scatter(
@@ -69,7 +72,10 @@ def main():
             y="TransactionDate",
             color="ProductCategory",
         )
-        .properties(width=750)
+        .properties(
+            width=750,
+            title="Transactions",
+        )
     )
     scatter.save(f"{__dir__}/scatter.png")
 
