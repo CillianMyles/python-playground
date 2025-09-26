@@ -38,5 +38,5 @@ fn main() raises:
 
     var report = benchmark.run[measure](NUM_WARMUP, MAX_ITERS)
     var time_s = report.mean()
-    var time_ms = time_s * 1e6
+    var time_ms = time_s * 1_000
     print("{} ms - {} items - binary search - Mojo".format(time_ms, SIZE))

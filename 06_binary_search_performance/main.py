@@ -31,7 +31,7 @@ def main():
         lambda: binary_search(SIZE - 1, get_collection()),
         number=MAX_ITERS,
     )
-    time_ms = time_s * 1_000_000
+    time_ms = time_s * 1_000
     print(f"{time_ms} ms - {SIZE!r} items - binary search - Python")
 
 
