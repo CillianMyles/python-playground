@@ -30,6 +30,17 @@ def main():
     num_customers = data.select(pl.col("CustomerID").n_unique()).collect()
     print("num_customers:", num_customers)
 
+    # combine filter, select, and sum
+    books_totals = (
+        data.filter(
+            (pl.col("ProductCategory") == "Books")
+            & (pl.col("DiscountApplied(%)") <= 10.0)
+        )
+        .select(pl.sum("TotalAmount"))
+        .collect()
+    )
+    print("books_totals:", books_totals)
+
 
 if __name__ == "__main__":
     main()
