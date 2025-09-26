@@ -44,8 +44,12 @@ def main():
     # list product catgories which have the biggest total amounts spent cummulatively
     best_performing_categories = (
         data.group_by("ProductCategory")
-        .agg(pl.sum("TotalAmount"))
-        .sort(by="TotalAmount", descending=True)
+        .agg(
+            pl.sum("TotalAmount").alias("Total"),
+            pl.mean("TotalAmount").alias("Average"),
+            pl.count("TotalAmount").alias("Count"),
+        )
+        .sort(by="Total", descending=True)
         .collect()
     )
     print("best_performing_categories:", best_performing_categories)
