@@ -18,19 +18,19 @@ def duplicate_file(
         output_path (str | Path): Path to the output file.
         lines_in_output (int): Number of lines to write to the output file.
     """
-    input = Path(input_path)
-    output = Path(output_path)
+    input_path = Path(input_path)
+    output_path = Path(output_path)
 
-    with input.open("r") as input, output.open("w") as output:
-        lines = list(input.readlines())
+    with input_path.open("r") as in_file, output_path.open("w") as out_file:
+        lines = list(in_file.readlines())
         if not lines:
-            raise ValueError("Input file is empty.")
-        
+            raise ValueError(f'Input file "{input_path}" is empty.')
+
         while True:
             for line in lines:
                 if lines_in_output <= 0:
                     return
-                output.write(line)
+                out_file.write(line)
                 lines_in_output -= 1
 
 
