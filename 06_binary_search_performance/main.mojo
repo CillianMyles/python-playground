@@ -23,7 +23,7 @@ fn binary_search(element: Int, array: List[Int]) -> Int:
     return -1
 
 
-# create at compile-time, so not optimised away by compiler
+# generate at compile-time
 @parameter
 fn get_collection() -> List[Int]:
     var list = List[Int](SIZE)

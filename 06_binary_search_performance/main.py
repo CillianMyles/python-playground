@@ -21,9 +21,9 @@ def binary_search(element: int, array: List[int]) -> int:
     return -1
 
 
-# create at compile-time, so not optimised away by compiler
+# generate at compile-time
 def get_collection() -> List[int]:
-    return tuple(i for i in range(SIZE))
+    return [i for i in range(SIZE)]
 
 
 def main():
