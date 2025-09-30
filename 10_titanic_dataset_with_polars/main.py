@@ -28,7 +28,7 @@ def main():
     print("df:", basic_grouping_and_aggregation.collect())
 
 
-__dir__ = "10_more_polars"
+__dir__ = "10_titanic_dataset_with_polars"
 
 
 if __name__ == "__main__":
