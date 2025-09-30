@@ -19,8 +19,7 @@ def main():
     basic_grouping_and_aggregation = (
         data.group_by(["Survived", "Pclass"])
         .agg(pl.col("PassengerId").count().alias("counts"))
-        .sort(by="Survived", descending=False)
-        .sort(by="Pclass", descending=False)
+        .sort(by=["Pclass", "Survived"], descending=[False, False])
         .collect()
     )
     print("basic_grouping_and_aggregation:", basic_grouping_and_aggregation)
