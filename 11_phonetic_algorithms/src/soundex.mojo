@@ -1,5 +1,5 @@
 """
-Soundex algorithm implementation.
+Soundex algorithm implementation (in Mojo).
 Based on: https://code.activestate.com/recipes/52213-soundex-algorithm
 Adapted to match: https://www.archives.gov/research/census/soundex
 """
@@ -8,9 +8,10 @@ Adapted to match: https://www.archives.gov/research/census/soundex
 alias _DIGITS = "0123012H02245501262301W202"
 alias _LENGTH = 4
 
+
 fn soundex(
-    input: String, 
-    digits: String = _DIGITS, 
+    input: String,
+    digits: String = _DIGITS,
     length: Int = _LENGTH,
 ) -> String:
     var output = ""
@@ -29,7 +30,9 @@ fn soundex(
             var digit = String(digits[index])
 
             # duplicate consecutive soundex digits are skipped
-            if len(output) == 0 or (digit != output[-1] and digit != "H" and digit != "W"):
+            if len(output) == 0 or (
+                digit != output[-1] and digit != "H" and digit != "W"
+            ):
                 output += digit
 
     # replace first digit with first alpha character

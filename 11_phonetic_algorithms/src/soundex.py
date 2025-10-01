@@ -1,5 +1,5 @@
 """
-Soundex algorithm implementation.
+Soundex algorithm implementation (in Python).
 Based on: https://code.activestate.com/recipes/52213-soundex-algorithm
 Adapted to match: https://www.archives.gov/research/census/soundex
 """
