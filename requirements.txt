@@ -12,3 +12,6 @@ snakeviz==2.2.2
 
 altair==5.5.0
 vl-convert-python==1.8.0
+
+metaphone==0.6
+soundex==1.1.3
