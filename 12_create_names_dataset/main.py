@@ -6,7 +6,6 @@ def generate_and_persist_names(
     per_category: int,
     locale: str = "en_US",
 ) -> None:
-    print("-" * 80)
     print(f'Locale: "{locale}"')
 
     fake = Faker(locale=locale)
@@ -40,7 +39,7 @@ def generate_and_persist_names(
     file = f"{dir}/{locale}.txt"
     os.makedirs(dir, exist_ok=True)
     with open(file, "w") as f:
-        for name in sorted(first_names_male):
+        for name in first_names_male:
             f.write(f"{name}\n")
     print(f'Male Names: {len(first_names_male)} written to "{file}"')
 
@@ -48,7 +47,7 @@ def generate_and_persist_names(
     file = f"{dir}/{locale}.txt"
     os.makedirs(dir, exist_ok=True)
     with open(file, "w") as f:
-        for name in sorted(first_names_female):
+        for name in first_names_female:
             f.write(f"{name}\n")
     print(f'Female Names: {len(first_names_female)} written to "{file}"')
 
@@ -56,17 +55,18 @@ def generate_and_persist_names(
     os.makedirs(dir, exist_ok=True)
     file = f"{dir}/{locale}.txt"
     with open(file, "w") as f:
-        for name in sorted(last_names):
+        for name in last_names:
             f.write(f"{name}\n")
     print(f'Last Names: {len(last_names)} written to "{file}"')
 
 
 def generate_names_for_locales(count: int, locales: list[str]):
     for locale in locales:
+        print("-" * 80)
         generate_and_persist_names(count, locale)
 
 
-def generate_names_data():
+def generate_names_input_files():
     generate_names_for_locales(250, ["en_US", "en_CA"])
     generate_names_for_locales(100, ["en_GB", "en_IE", "en_AU"])
     generate_names_for_locales(100, ["es_ES", "es_MX"])
@@ -78,8 +78,39 @@ def generate_names_data():
     generate_names_for_locales(50, ["pl_PL"])
 
 
+def generate_names_output_file():
+    names = set()
+
+    dir = f"{__directory__}/first_names_male"
+    files = os.listdir(dir)
+    for file in files:
+        with open(f"{dir}/{file}", "r") as f:
+            for line in f:
+                names.add(line.strip())
+
+    dir = f"{__directory__}/first_names_female"
+    files = os.listdir(dir)
+    for file in files:
+        with open(f"{dir}/{file}", "r") as f:
+            for line in f:
+                names.add(line.strip())
+
+    dir = f"{__directory__}/last_names"
+    files = os.listdir(dir)
+    for file in files:
+        with open(f"{dir}/{file}", "r") as f:
+            for line in f:
+                names.add(line.strip())
+
+    # TODO: save names to a CSV with a single column "name"
+
+    print("-" * 80)
+    print(f"Total unique names collected: {len(names)}")
+
+
 def main():
-    generate_names_data()
+    # generate_names_input_files()
+    generate_names_output_file()
 
 
 __directory__ = "12_create_names_dataset"
