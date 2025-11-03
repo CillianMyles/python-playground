@@ -1,5 +1,6 @@
 import os
 from faker import Faker
+import polars as pl
 
 
 def generate_and_persist_names(
@@ -66,7 +67,7 @@ def generate_names_for_locales(count: int, locales: list[str]):
         generate_and_persist_names(count, locale)
 
 
-def generate_names_input_files():
+def generate_name_files_per_locale():
     generate_names_for_locales(250, ["en_US", "en_CA"])
     generate_names_for_locales(100, ["en_GB", "en_IE", "en_AU"])
     generate_names_for_locales(100, ["es_ES", "es_MX"])
@@ -78,7 +79,7 @@ def generate_names_input_files():
     generate_names_for_locales(50, ["pl_PL"])
 
 
-def generate_names_output_file():
+def create_single_names_file():
     names = set()
 
     dir = f"{__directory__}/first_names_male"
@@ -86,31 +87,34 @@ def generate_names_output_file():
     for file in files:
         with open(f"{dir}/{file}", "r") as f:
             for line in f:
-                names.add(line.strip())
+                names.add(line.strip().upper())
 
     dir = f"{__directory__}/first_names_female"
     files = os.listdir(dir)
     for file in files:
         with open(f"{dir}/{file}", "r") as f:
             for line in f:
-                names.add(line.strip())
+                names.add(line.strip().upper())
 
     dir = f"{__directory__}/last_names"
     files = os.listdir(dir)
     for file in files:
         with open(f"{dir}/{file}", "r") as f:
             for line in f:
-                names.add(line.strip())
-
-    # TODO: save names to a CSV with a single column "name"
+                names.add(line.strip().upper())
 
     print("-" * 80)
     print(f"Total unique names collected: {len(names)}")
 
+    df = pl.DataFrame({"name": list(names)})
+    file = f"{__directory__}/names.csv"
+    df.write_csv(file, separator=",", include_header=True)
+    print(f'Written to: "{file}"')
+
 
 def main():
-    # generate_names_input_files()
-    generate_names_output_file()
+    generate_name_files_per_locale()
+    create_single_names_file()
 
 
 __directory__ = "12_create_names_dataset"
