@@ -1,6 +1,5 @@
 import os
 from faker import Faker
-import polars as pl
 
 
 def generate_and_persist_names(
