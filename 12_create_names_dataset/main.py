@@ -103,12 +103,13 @@ def create_single_names_file():
             for line in f:
                 names.add(line.strip().upper())
 
+    file = f"{__directory__}/names.txt"
+    with open(file, "w") as f:
+        for name in list(names):
+            f.write(f"{name}\n")
+
     print("-" * 80)
     print(f"Total unique names collected: {len(names)}")
-
-    df = pl.DataFrame({"name": list(names)})
-    file = f"{__directory__}/names.csv"
-    df.write_csv(file, separator=",", include_header=True)
     print(f'Written to: "{file}"')
 
 
