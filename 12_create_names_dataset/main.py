@@ -19,11 +19,17 @@ def generate_and_persist_names(
     while count < per_category:
         count += 1
         while len(first_names_male) < count:
-            first_names_male.add(fake.first_name_male())
+            name = fake.first_name_male()
+            if name.isascii() and name.isalpha():
+                first_names_male.add(name)
         while len(first_names_female) < count:
-            first_names_female.add(fake.first_name_female())
+            name = fake.first_name_female()
+            if name.isascii() and name.isalpha():
+                first_names_female.add(name)
         while len(last_names) < count:
-            last_names.add(fake.last_name())
+            name = fake.last_name()
+            if name.isascii() and name.isalpha():
+                last_names.add(name)
 
     # Persist names to files
     with open(f"{__directory__}/first_names_male/{locale}.txt", "w") as f:
@@ -51,12 +57,11 @@ def generate_names_data():
     generate_names_for_locale(100, ["en_GB", "en_IE", "en_AU"])
     generate_names_for_locale(100, ["es_ES", "es_MX"])
     generate_names_for_locale(75, ["pt_PT", "pt_BR"])
-    generate_names_for_locale(75, ["fr_FR", "fr_CA"])
+    generate_names_for_locale(50, ["fr_FR", "fr_CA"])
     generate_names_for_locale(100, ["it_IT"])
     generate_names_for_locale(100, ["nl_NL"])
     generate_names_for_locale(100, ["de_DE"])
     generate_names_for_locale(50, ["pl_PL"])
-    generate_names_for_locale(75, ["ru_RU"])
 
 
 def main():
