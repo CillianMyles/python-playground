@@ -35,7 +35,7 @@ def generate_and_persist_names(
                 last_names.add(name)
 
     # Persist names to files
-    dir = f"{__directory__}/first_names_male"
+    dir = f"{__dir__}/first_names_male"
     file = f"{dir}/{locale}.txt"
     os.makedirs(dir, exist_ok=True)
     with open(file, "w") as f:
@@ -43,7 +43,7 @@ def generate_and_persist_names(
             f.write(f"{name}\n")
     print(f'Male Names: {len(first_names_male)} written to "{file}"')
 
-    dir = f"{__directory__}/first_names_female"
+    dir = f"{__dir__}/first_names_female"
     file = f"{dir}/{locale}.txt"
     os.makedirs(dir, exist_ok=True)
     with open(file, "w") as f:
@@ -51,7 +51,7 @@ def generate_and_persist_names(
             f.write(f"{name}\n")
     print(f'Female Names: {len(first_names_female)} written to "{file}"')
 
-    dir = f"{__directory__}/last_names"
+    dir = f"{__dir__}/last_names"
     os.makedirs(dir, exist_ok=True)
     file = f"{dir}/{locale}.txt"
     with open(file, "w") as f:
@@ -81,28 +81,28 @@ def generate_name_files_per_locale():
 def create_single_names_file():
     names = set()
 
-    dir = f"{__directory__}/first_names_male"
+    dir = f"{__dir__}/first_names_male"
     files = os.listdir(dir)
     for file in files:
         with open(f"{dir}/{file}", "r") as f:
             for line in f:
                 names.add(line.strip().upper())
 
-    dir = f"{__directory__}/first_names_female"
+    dir = f"{__dir__}/first_names_female"
     files = os.listdir(dir)
     for file in files:
         with open(f"{dir}/{file}", "r") as f:
             for line in f:
                 names.add(line.strip().upper())
 
-    dir = f"{__directory__}/last_names"
+    dir = f"{__dir__}/last_names"
     files = os.listdir(dir)
     for file in files:
         with open(f"{dir}/{file}", "r") as f:
             for line in f:
                 names.add(line.strip().upper())
 
-    file = f"{__directory__}/names.txt"
+    file = f"{__dir__}/names.txt"
     with open(file, "w") as f:
         for name in list(names):
             f.write(f"{name}\n")
@@ -117,7 +117,7 @@ def main():
     create_single_names_file()
 
 
-__directory__ = "12_create_names_dataset"
+__dir__ = "12_create_names_dataset"
 
 
 if __name__ == "__main__":
