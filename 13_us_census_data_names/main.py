@@ -11,19 +11,19 @@ def add_if_new(token: str, seen: set[str], out: list[str], target: int) -> bool:
     return False
 
 
-def main():
+def generate_6000_unique_names_in_single_file():
     target = 6_000
     unique: set[str] = set()
     ordered: list[str] = []
 
-    male_p = BASE / "data/input/male_names.txt"
-    female_p = BASE / "data/input/female_names.txt"
-    last_p = BASE / "data/input/last_names.txt"
+    male_input = BASE / "data/input/male_names.txt"
+    female_input = BASE / "data/input/female_names.txt"
+    last_input = BASE / "data/input/last_names.txt"
 
     with (
-        male_p.open("r", encoding="utf-8") as m,
-        female_p.open("r", encoding="utf-8") as f,
-        last_p.open("r", encoding="utf-8") as l,
+        male_input.open("r", encoding="utf-8") as m,
+        female_input.open("r", encoding="utf-8") as f,
+        last_input.open("r", encoding="utf-8") as l,
     ):
         while len(ordered) < target:
             m_line = m.readline()
@@ -48,13 +48,17 @@ def main():
 
     print(f"Unique names collected: {len(unique)}")
 
-    out_p = BASE / "data/output/names.txt"
-    out_p.parent.mkdir(parents=True, exist_ok=True)
-    with out_p.open("w", encoding="utf-8", newline="\n") as f:
+    output = BASE / "data/output/names.txt"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8", newline="\n") as f:
         for name in ordered:
             f.write(f"{name}\n")
 
-    print(f'Written to: "{out_p}"')
+    print(f'Written to: "{output}"')
+
+
+def main():
+    generate_6000_unique_names_in_single_file()
 
 
 if __name__ == "__main__":
