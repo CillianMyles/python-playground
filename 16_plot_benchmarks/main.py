@@ -26,11 +26,21 @@ def plot_benchmark(labels, python_times, rust_times, dataset_label, filename):
     x = range(len(labels))
     width = 0.35
     plt.rcParams["axes.facecolor"] = primary_color
-    plt.figure(figsize=(6, 4), facecolor=primary_color, edgecolor=text_color)
+    plt.figure(figsize=(6, 4), facecolor=primary_color)
     plt.bar(
-        [i - width / 2 for i in x], python_times, width, label="Python", color=violet
+        [i - width / 2 for i in x],
+        python_times,
+        width,
+        label="Python",
+        color=violet,
     )
-    plt.bar([i + width / 2 for i in x], rust_times, width, label="Rust", color=teal)
+    plt.bar(
+        [i + width / 2 for i in x],
+        rust_times,
+        width,
+        label="Rust",
+        color=teal,
+    )
     plt.ylabel("Time (seconds)", color=text_color)
     plt.title(
         f"Phonetic Algorithms Applied to Dataset with {dataset_label}", color=text_color
