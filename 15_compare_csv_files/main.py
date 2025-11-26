@@ -189,6 +189,7 @@ def compare_three(
     csv2: str,
     csv3: str,
     ignore_cols: Sequence[str] | None = None,
+    sort_rows: bool = True,
     csv_has_header: bool = True,
 ) -> None:
     paths = [csv1, csv2, csv3]
@@ -196,7 +197,7 @@ def compare_three(
 
     print("Loading CSVs...")
     dfs = [
-        normalize_df(load_csv(p), ignore_cols=ignore_cols)
+        normalize_df(load_csv(p), ignore_cols=ignore_cols, sort_rows=sort_rows)
         for p in paths
     ]
 
@@ -238,6 +239,11 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--no-sort-rows",
+        action="store_true",
+        help="Do NOT sort rows before comparison (i.e., make row order matter).",
+    )
+    parser.add_argument(
         "--no-header",
         action="store_true",
         help="Set this if the CSVs do NOT have a header row.",
@@ -252,6 +258,7 @@ def main(argv: List[str]) -> None:
         args.csv2,
         args.csv3,
         ignore_cols=args.ignore_cols,
+        sort_rows=not args.no_sort_rows,
         csv_has_header=not args.no_header,
     )
 
