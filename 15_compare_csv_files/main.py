@@ -227,7 +227,6 @@ def compare_three(
     sort_rows: bool = True,
 ) -> None:
     paths = [csv1, csv2, csv3]
-    names = ["A", "B", "C"]
 
     print("Loading CSVs...")
     dfs = [

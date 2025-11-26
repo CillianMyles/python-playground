@@ -33,14 +33,14 @@ def generate_single_list_of_unique_names_in_single_file():
     last_input = BASE / "data/input/last_names.txt"
 
     with (
-        male_input.open("r", encoding="utf-8") as m,
-        female_input.open("r", encoding="utf-8") as f,
-        last_input.open("r", encoding="utf-8") as l,
+        male_input.open("r", encoding="utf-8") as male,
+        female_input.open("r", encoding="utf-8") as female,
+        last_input.open("r", encoding="utf-8") as last,
     ):
         while len(ordered) < target:
-            m_line = m.readline()
-            f_line = f.readline()
-            l_line = l.readline()
+            m_line = male.readline()
+            f_line = female.readline()
+            l_line = last.readline()
 
             if not m_line and not f_line and not l_line:
                 break  # all files exhausted
@@ -62,9 +62,9 @@ def generate_single_list_of_unique_names_in_single_file():
 
     output = BASE / "data/output/names.txt"
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("w", encoding="utf-8", newline="\n") as f:
+    with output.open("w", encoding="utf-8", newline="\n") as file:
         for name in ordered:
-            f.write(f"{name}\n")
+            file.write(f"{name}\n")
 
     print(f'Written to: "{output}"')
 
@@ -89,13 +89,13 @@ def generate_combinations_of_unique_names():
 
     # First names
     with (
-        male_input.open("r", encoding="utf-8") as m,
-        female_input.open("r", encoding="utf-8") as f,
+        male_input.open("r", encoding="utf-8") as male,
+        female_input.open("r", encoding="utf-8") as file,
     ):
         idx = 0
         while len(ordered_first) < target_first_names:
-            m_line = m.readline()
-            f_line = f.readline()
+            m_line = male.readline()
+            f_line = file.readline()
 
             if not m_line and not f_line:
                 print("Reached end of first name file(s) early")
@@ -116,9 +116,9 @@ def generate_combinations_of_unique_names():
                 break
 
     # Last names
-    with last_input.open("r", encoding="utf-8") as l:
+    with last_input.open("r", encoding="utf-8") as last:
         while len(ordered_last) < target_last_names:
-            l_line = l.readline()
+            l_line = last.readline()
             if not l_line:
                 print("Reached end of last name file(s) early")
                 break
@@ -135,10 +135,10 @@ def generate_combinations_of_unique_names():
 
     output = BASE / "data/output/combinations.txt"
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("w", encoding="utf-8", newline="\n") as f:
+    with output.open("w", encoding="utf-8", newline="\n") as file:
         for first_name in ordered_first:
             for last_name in ordered_last:
-                f.write(f"{first_name} {last_name}\n")
+                file.write(f"{first_name} {last_name}\n")
     print(f'Wrote TXT file: "{output}"')
 
     lf_first = pl.LazyFrame({"First": ordered_first})
