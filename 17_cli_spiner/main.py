@@ -12,7 +12,7 @@ MESSAGES = [
 ]
 
 
-def run_stages():
+def main():
     with spinning() as spinner:
         for message in MESSAGES:
             spinner.message = message
@@ -20,4 +20,4 @@ def run_stages():
 
 
 if __name__ == "__main__":
-    run_stages()
+    main()
