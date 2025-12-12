@@ -5,6 +5,7 @@ _visible_for = 2.0  # seconds
 
 
 MESSAGES = [
+    "Reading input...",
     "Applying transformations to data...",
     "Generating output...",
     "Writing output...",
@@ -12,8 +13,7 @@ MESSAGES = [
 
 
 def run_stages():
-    with spinning("Reading input...") as spinner:
-        time.sleep(_visible_for)
+    with spinning() as spinner:
         for message in MESSAGES:
             spinner.message = message
             time.sleep(_visible_for)
