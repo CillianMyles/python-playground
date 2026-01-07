@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import sys
-from pathlib import Path
-import argparse
-from typing import List, Sequence, Dict
 
+import argparse
+import sys
 import polars as pl
 from polars.testing import assert_frame_equal
+from pathlib import Path
+from typing import Dict, List, Sequence
 
 
 def load_csv(path: str | Path) -> pl.DataFrame:
