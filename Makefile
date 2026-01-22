@@ -22,7 +22,7 @@ verify-venv:
 install-deps:
 	$(PIP_ENV) $(PYTHON) -m pip install $(PIP_ARGS) -r requirements.txt
 
-.PHONY: destroy-venv lint lint-fix format
+.PHONY: destroy-venv
 destroy-venv:
 	rm -rf $(VENV)
 
