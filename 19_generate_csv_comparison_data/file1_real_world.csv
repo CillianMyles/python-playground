@@ -1,0 +1,4 @@
+user_id,email,plan,status,last_login
+101,alice@test.com,free,active,2024-12-01
+102,bob@test.com,pro,active,2024-12-05
+103,charlie@test.com,free,inactive,2024-11-20
