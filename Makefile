@@ -29,7 +29,7 @@ destroy-venv:
 .PHONY: lint
 lint:
 	ruff check .
-	
+
 .PHONY: lint-fix
 lint-fix:
 	ruff check . --fix
