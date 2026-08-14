@@ -18,11 +18,7 @@ def main():
         secret,
         algorithm="HS256",
     )
-    print("")
-    print("Generated JWT...")
-    print("")
-    print(token)
-    print("")
+    print(f"\nGenerating JWT...\n\n{token}\n")
 
 
 if __name__ == "__main__":
