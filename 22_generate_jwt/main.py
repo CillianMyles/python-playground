@@ -9,7 +9,6 @@ def main():
     payload = {
         "sub": "user123",
         "email": "getme@cillianmyles.com",
-        "sub": "user123",
         "iat": created_at,
         "exp": expires_at,
     }
