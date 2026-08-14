@@ -1,11 +1,15 @@
+from datetime import datetime, timedelta, timezone
+
 import jwt
-import time
+
+
+SECRET = "extra-super-special-secret-sauce"
+ALGORITHM = "HS256"
 
 
 def main():
-    secret = "extra-super-special-secret-sauce"
-    created_at = int(time.time())
-    expires_at = created_at + 3600
+    created_at = datetime.now(timezone.utc)
+    expires_at = created_at + timedelta(hours=1)
     payload = {
         "sub": "user123",
         "email": "getme@cillianmyles.com",
@@ -14,8 +18,8 @@ def main():
     }
     token = jwt.encode(
         payload,
-        secret,
-        algorithm="HS256",
+        SECRET,
+        algorithm=ALGORITHM,
     )
     print(f"\nGenerating JWT...\n\n{token}\n")
 

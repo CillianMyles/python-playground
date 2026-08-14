@@ -1,48 +1,56 @@
 import base64
+import binascii
 import json
 
 
-def b64_with_padding(b64: str) -> str:
-    missing_padding = len(b64) % 4
-    if missing_padding:
-        b64 += "=" * (4 - missing_padding)
-    return b64
+def with_base64_padding(value: str) -> str:
+    return value + "=" * (-len(value) % 4)
 
 
-def parse_jwt(token: str) -> None:
-    # split the jwt into its 3 components
+def decode_segment(segment: str) -> bytes:
+    return base64.urlsafe_b64decode(with_base64_padding(segment))
+
+
+def decode_json_segment(segment: str) -> dict:
+    segment_bytes = decode_segment(segment)
+    return json.loads(segment_bytes.decode("utf-8"))
+
+
+def parse_jwt(token: str) -> dict:
     try:
         header_b64, payload_b64, signature_b64 = token.split(".")
-    except Exception:
-        raise ValueError("Invalid JWT format: Must contain exactly 2 dots")
+    except ValueError as e:
+        raise ValueError("Invalid JWT format: must contain exactly 2 dots") from e
 
-    # parse the header
     try:
-        header_bytes = base64.urlsafe_b64decode(b64_with_padding(header_b64))
-        header = json.loads(header_bytes.decode("utf-8"))
-        print(f"header: {header}")
-    except Exception:
-        raise ValueError("invalid header")
+        header = decode_json_segment(header_b64)
+    except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError) as e:
+        raise ValueError("Invalid header") from e
 
-    # parse the payload
     try:
-        payload_bytes = base64.urlsafe_b64decode(b64_with_padding(payload_b64))
-        payload = json.loads(payload_bytes.decode("utf-8"))
-        print(f"payload: {payload}")
-    except Exception:
-        raise ValueError("invalid payload")
+        payload = decode_json_segment(payload_b64)
+    except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError) as e:
+        raise ValueError("Invalid payload") from e
 
-    # parse the signature
     try:
-        signature_bytes = base64.urlsafe_b64decode(b64_with_padding(signature_b64))
-        print(f"signature: {signature_bytes}")
-    except Exception:
-        raise ValueError("invalid signature")
+        signature = decode_segment(signature_b64)
+    except binascii.Error as e:
+        raise ValueError("Invalid signature") from e
+
+    return {
+        "header": header,
+        "payload": payload,
+        "signature": signature,
+    }
 
 
 def main():
     token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZW1haWwiOiJnZXRtZUBjaWxsaWFubXlsZXMuY29tIiwiaWF0IjoxNzg2NzQyOTAwLCJleHAiOjE3ODY3NDY1MDB9.02uiRGXcjxSlJyQeTiswLRgplkP28Q_BL3MbPHfQw3g"
-    parse_jwt(token)
+    parsed_token = parse_jwt(token)
+
+    print(f"header: {parsed_token['header']}")
+    print(f"payload: {parsed_token['payload']}")
+    print(f"signature: {parsed_token['signature']}")
 
 
 if __name__ == "__main__":
