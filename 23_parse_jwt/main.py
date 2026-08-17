@@ -3,20 +3,24 @@ import binascii
 import json
 
 
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZW1haWwiOiJnZXRtZUBjaWxsaWFubXlsZXMuY29tIiwiaWF0IjoxNzg2NzQyOTAwLCJleHAiOjE3ODY3NDY1MDB9.02uiRGXcjxSlJyQeTiswLRgplkP28Q_BL3MbPHfQw3g"
+
+
 def with_base64_padding(value: str) -> str:
     return value + "=" * (-len(value) % 4)
 
 
-def decode_segment(segment: str) -> bytes:
-    return base64.urlsafe_b64decode(with_base64_padding(segment))
+def decode_segment_bytes(segment: str) -> bytes:
+    padded = with_base64_padding(segment)
+    return base64.urlsafe_b64decode(padded)
 
 
 def decode_json_segment(segment: str) -> dict:
-    segment_bytes = decode_segment(segment)
-    return json.loads(segment_bytes.decode("utf-8"))
+    bytes = decode_segment_bytes(segment)
+    return json.loads(bytes.decode("utf-8"))
 
 
-def parse_jwt(token: str) -> dict:
+def parse_jwt(token: str) -> tuple[dict, dict, bytes]:
     try:
         header_b64, payload_b64, signature_b64 = token.split(".")
     except ValueError as e:
@@ -33,24 +37,19 @@ def parse_jwt(token: str) -> dict:
         raise ValueError("Invalid payload") from e
 
     try:
-        signature = decode_segment(signature_b64)
+        signature = decode_segment_bytes(signature_b64)
     except binascii.Error as e:
         raise ValueError("Invalid signature") from e
 
-    return {
-        "header": header,
-        "payload": payload,
-        "signature": signature,
-    }
+    return header, payload, signature
 
 
 def main():
-    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZW1haWwiOiJnZXRtZUBjaWxsaWFubXlsZXMuY29tIiwiaWF0IjoxNzg2NzQyOTAwLCJleHAiOjE3ODY3NDY1MDB9.02uiRGXcjxSlJyQeTiswLRgplkP28Q_BL3MbPHfQw3g"
-    parsed_token = parse_jwt(token)
+    hedaer, payload, signature = parse_jwt(TOKEN)
 
-    print(f"header: {parsed_token['header']}")
-    print(f"payload: {parsed_token['payload']}")
-    print(f"signature: {parsed_token['signature']}")
+    print(f"header: {hedaer}")
+    print(f"payload: {payload}")
+    print(f"signature: {signature}")
 
 
 if __name__ == "__main__":
