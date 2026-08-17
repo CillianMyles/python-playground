@@ -9,20 +9,6 @@ SECRET = "extra-super-special-secret-sauce"
 ALGORITHM = "HS256"
 
 
-def create_jwt(payload: dict, secret: str, algorithm: str) -> str:
-    print("")
-    print("Generating JWT...")
-    print("")
-    print(f"payload: {json.dumps(payload, indent=2)}")
-    print(f'secret: "{secret}"')
-    print("")
-    print("")
-    token = jwt.encode(payload, secret, algorithm=algorithm)
-    print(token)
-    print("")
-    return token
-
-
 def main():
     created_at = int(time.time())
     expires_at = created_at + 3600
@@ -32,7 +18,21 @@ def main():
         "iat": created_at,
         "exp": expires_at,
     }
-    create_jwt(payload, SECRET, ALGORITHM)
+    token = jwt.encode(
+        payload,
+        SECRET,
+        algorithm=ALGORITHM,
+    )
+
+    print("")
+    print("Generating JWT...")
+    print("")
+    print(f"payload: {json.dumps(payload, indent=2)}")
+    print(f'secret: "{SECRET}"')
+    print("")
+    print("")
+    print(token)
+    print("")
 
 
 if __name__ == "__main__":
